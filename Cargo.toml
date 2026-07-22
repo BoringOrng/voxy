@@ -1,0 +1,59 @@
+cargo-features = ["codegen-backend"]
+
+[package]
+name = "voxy"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+members = ["crates/vx_*"]
+
+[lints]
+workspace = true
+
+[workspace.dependencies]
+bevy = { version = "0.19", features = [
+    "3d",
+    "audio",
+] }
+log = { version = "0.4", features = [
+    "max_level_debug",
+    "release_max_level_warn",
+] }
+
+vx_client.path = "crates/vx_client"
+vx_entity.path = "crates/vx_entity"
+vx_player.path = "crates/vx_player"
+vx_server.path = "crates/vx_server"
+vx_world.path  = "crates/vx_world"
+
+[workspace.lints.clippy]
+pedantic = "warn"
+nursery  = "warn"
+
+[dependencies]
+bevy.workspace = true
+clap = { version = "4.6.4", features = ["derive"] }
+
+vx_client.workspace = true
+vx_server.workspace = true
+
+[profile.dev]
+codegen-backend = "cranelift"
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
+codegen-backend = "llvm"
+opt-level = 3
+
+[profile.dev.package.wgpu-types]
+debug-assertions = false
+
+[profile.release]
+codegen-units = 1
+lto = "thin"
+
+[profile.debugging]
+inherits = "dev"
+debug = true

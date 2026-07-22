@@ -1,0 +1,12 @@
+[package]
+name = "vx_client"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy.workspace = true
+
+vx_player.workspace = true
+
+[lints]
+workspace = true
