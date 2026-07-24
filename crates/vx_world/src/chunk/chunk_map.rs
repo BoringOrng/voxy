@@ -15,4 +15,16 @@ impl ChunkMap {
     pub fn remove(&mut self, pos: &ChunkPos) -> Option<Entity> {
         self.map.remove(pos)
     }
+
+    #[must_use]
+    pub fn adjacent_to(&self, pos: ChunkPos) -> [Option<Entity>; 6] {
+        [
+            self.map.get(&pos.up()).copied(),
+            self.map.get(&pos.down()).copied(),
+            self.map.get(&pos.north()).copied(),
+            self.map.get(&pos.south()).copied(),
+            self.map.get(&pos.east()).copied(),
+            self.map.get(&pos.west()).copied(),
+        ]
+    }
 }
