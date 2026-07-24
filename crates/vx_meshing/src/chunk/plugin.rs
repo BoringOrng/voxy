@@ -1,5 +1,8 @@
 use bevy::prelude::*;
-use vx_world::{block::BlockPos, chunk::ChunkData};
+use vx_world::{
+    block::BlockPos,
+    chunk::{ChunkData, ChunkMap, ChunkPos},
+};
 
 use crate::{
     Quad,
@@ -11,17 +14,31 @@ use crate::{
 pub struct ChunkMeshingPlugin;
 
 impl ChunkMeshingPlugin {
+    #[expect(
+        clippy::needless_pass_by_value,
+        reason = "`Res<ChunkMap>` must be passed by value as is required by bevy"
+    )]
     fn mesh_dirty(
         mut commands: Commands,
         mut meshes: ResMut<Assets<Mesh>>,
         mut materials: ResMut<Assets<StandardMaterial>>,
-        dirty_chunks: Query<(Entity, &ChunkData), With<DirtyChunk>>,
+        chunk_map: Res<ChunkMap>,
+        chunk_data_q: Query<&ChunkData>,
+        dirty_chunks: Query<(Entity, &ChunkPos), With<DirtyChunk>>,
     ) {
-        for (chunk_entity, chunk_data) in &dirty_chunks {
-            // TODO: use actual `ChunkMap`
-            let sampler = BlockSampler::new(chunk_data, [None; 6]);
-            let blocks = chunk_data.blocks();
+        for (chunk_entity, &chunk_pos) in &dirty_chunks {
+            let chunk_data = chunk_data_q
+                .get(chunk_entity)
+                .expect("All chunk entities should have an associated `ChunkData`");
 
+            let sampler = BlockSampler::new(
+                chunk_data,
+                chunk_map
+                    .adjacent_to(chunk_pos)
+                    .map(|e| e.and_then(|e| chunk_data_q.get(e).ok())),
+            );
+
+            let blocks = chunk_data.blocks();
             let mut quads = Vec::new();
 
             #[expect(
