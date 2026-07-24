@@ -28,22 +28,19 @@ impl ChunkMeshingPlugin {
                 clippy::cast_possible_truncation,
                 reason = "an index into the block data can never exceed `u16` precision"
             )]
-            let occupancies = blocks
+            for (block_pos, block_id) in blocks
                 .iter()
                 .enumerate()
                 .filter_map(|(i, id)| id.map(|id| (BlockPos::from_raw(i as u16), id)))
-                .collect::<Vec<_>>();
-
-            for (block_pos, block_id) in occupancies {
+            {
                 // TODO: texture sampling
                 _ = block_id;
 
-                for &face in Face::ALL
+                Face::ALL
                     .iter()
                     .filter(|&&face| !sampler.occluded(block_pos, face))
-                {
-                    quads.push(Quad::new(block_pos, face));
-                }
+                    .map(|&face| Quad::new(block_pos, face))
+                    .collect_into(&mut quads);
             }
 
             commands

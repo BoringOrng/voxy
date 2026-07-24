@@ -1,3 +1,5 @@
+#![feature(iter_collect_into)]
+
 use bevy::app::plugin_group;
 
 pub mod block;

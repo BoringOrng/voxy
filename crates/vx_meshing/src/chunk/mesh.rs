@@ -11,6 +11,9 @@ pub struct ChunkMesh {
 }
 
 impl ChunkMesh {
+    /// # Panics
+    ///
+    /// Panics if the number of quads * 4 overflows an `u32`.
     pub fn from_quads<I>(quads: I) -> Self
     where
         I: IntoIterator<Item = Quad>,
@@ -20,13 +23,12 @@ impl ChunkMesh {
         let mut indices = Vec::new();
 
         for (i, quad) in quads.into_iter().enumerate() {
-            let corners = quad.face().corners().map(|c| c + quad.pos().as_vec3());
-            let normals = [quad.face().normal(); 4];
+            positions.extend_from_slice(&quad.positions());
+            mesh_normals.extend_from_slice(&quad.normals());
 
-            positions.extend_from_slice(&corners);
-            mesh_normals.extend_from_slice(&normals);
+            let base = u32::try_from(i * 4)
+                .expect("mesh shouldn't contain enough quads to overflow an `u32`");
 
-            let base = i as u32 * 4;
             indices.extend_from_slice(&[base, base + 1, base + 2, base, base + 2, base + 3]);
         }
 

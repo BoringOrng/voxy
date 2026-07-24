@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use vx_world::{block::BlockPos, chunk::Chunk};
 
 #[derive(Clone, Copy)]
 pub enum Face {
@@ -25,8 +26,8 @@ impl Face {
         match self {
             Self::Up => IVec3::Y,
             Self::Down => IVec3::NEG_Y,
-            Self::North => IVec3::Z,
-            Self::South => IVec3::NEG_Z,
+            Self::North => IVec3::NEG_Z,
+            Self::South => IVec3::Z,
             Self::East => IVec3::X,
             Self::West => IVec3::NEG_X,
         }
@@ -54,10 +55,41 @@ impl Face {
         match self {
             Self::Up => c![3, 7, 6, 2],
             Self::Down => c![4, 0, 1, 5],
-            Self::North => c![4, 5, 6, 7],
-            Self::South => c![1, 0, 3, 2],
+            Self::North => c![1, 0, 3, 2],
+            Self::South => c![4, 5, 6, 7],
             Self::East => c![1, 2, 6, 5],
             Self::West => c![4, 7, 3, 0],
+        }
+    }
+
+    #[expect(
+        clippy::cast_possible_truncation,
+        reason = "`Chunk::SIZE.*` should always fit within an `u8`"
+    )]
+    #[must_use]
+    pub const fn wrap_pos(self, pos: BlockPos) -> BlockPos {
+        let wrapped = match self {
+            Self::Up => pos.with_y(0),
+            Self::Down => pos.with_y(Chunk::SIZE.y as u8 - 1),
+            Self::North => pos.with_z(0),
+            Self::South => pos.with_z(Chunk::SIZE.z as u8 - 1),
+            Self::East => pos.with_x(0),
+            Self::West => pos.with_x(Chunk::SIZE.x as u8 - 1),
+        };
+
+        // SAFETY: hard-coded values shouldn't be outside the bounds of a `BlockPos`
+        unsafe { wrapped.unwrap_unchecked() }
+    }
+
+    #[must_use]
+    pub const fn offset_pos(self, pos: BlockPos) -> Option<BlockPos> {
+        match self {
+            Self::Up => pos.up(),
+            Self::Down => pos.down(),
+            Self::North => pos.north(),
+            Self::South => pos.south(),
+            Self::East => pos.east(),
+            Self::West => pos.west(),
         }
     }
 }
