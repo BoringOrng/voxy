@@ -22,11 +22,12 @@ log = { version = "0.4", features = [
     "release_max_level_warn",
 ] }
 
-vx_client.path = "crates/vx_client"
-vx_entity.path = "crates/vx_entity"
-vx_player.path = "crates/vx_player"
-vx_server.path = "crates/vx_server"
-vx_world.path  = "crates/vx_world"
+vx_client.path  = "crates/vx_client"
+vx_entity.path  = "crates/vx_entity"
+vx_meshing.path = "crates/vx_meshing"
+vx_player.path  = "crates/vx_player"
+vx_server.path  = "crates/vx_server"
+vx_world.path   = "crates/vx_world"
 
 [workspace.lints.clippy]
 pedantic = "warn"

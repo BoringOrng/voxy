@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::{block::BlockId, chunk::Chunk};
+use crate::{
+    block::{BlockId, BlockPos},
+    chunk::Chunk,
+};
 
 #[derive(Debug, Clone, Component)]
 pub struct ChunkData {
@@ -13,6 +16,15 @@ impl ChunkData {
         // SAFETY: constructors should derive from the default constructor, which
         // guarantees an allocated size of `Chunk::VOLUME`
         unsafe { self.blocks.as_array().unwrap_unchecked() }
+    }
+
+    #[must_use]
+    pub const fn block_at(&self, pos: BlockPos) -> bool {
+        self.blocks()[pos.raw() as usize].is_some()
+    }
+
+    pub const fn insert(&mut self, pos: BlockPos, block: BlockId) -> Option<BlockId> {
+        self.blocks[pos.raw() as usize].replace(block)
     }
 }
 

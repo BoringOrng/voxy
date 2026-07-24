@@ -14,7 +14,7 @@ pub use chunk_map::ChunkMap;
 pub use chunk_plugin::ChunkPlugin;
 pub use chunk_pos::ChunkPos;
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Component)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, Hash, Component)]
 #[require(ChunkData, ChunkPos, Transform)]
 #[component(on_add, on_remove)]
 pub struct Chunk;
