@@ -1,0 +1,13 @@
+/*
+
+!/assets
+!/crates
+!/src
+
+!/Cargo.*
+!/flake.*
+
+!/rustfmt.toml
+!/LICENSE-APACHE
+!/LICENSE-MIT
+!/.gitignore
