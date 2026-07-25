@@ -1,6 +1,4 @@
 Block(
-    id: "voxy::block::grass",
-
     geometry: Cube(
         top: ColorMapped(
             texture: "voxy::texture::grass_top",

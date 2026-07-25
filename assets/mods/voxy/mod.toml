@@ -1,6 +1,6 @@
 [package]
 name = "voxy"
 version = "0.1.0"
-manifest_format = "0.2.0"
+manifest_format = "0.1.0"
 
 [dependencies]
