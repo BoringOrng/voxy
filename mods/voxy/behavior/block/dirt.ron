@@ -1,4 +1,6 @@
 Block(
+    id: "voxy:dirt",
+
     geometry: Cube(
         top: Texture("voxy::texture::dirt"),
         bottom: Texture("voxy::texture::dirt"),

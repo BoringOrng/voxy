@@ -1,5 +1,7 @@
 use bevy::{app::PluginGroupBuilder, camera_controller::free_camera::FreeCameraPlugin, prelude::*};
 use vx_meshing::{MeshingPlugins, chunk::DirtyChunk};
+use vx_mod::CoreModPlugin;
+use vx_mod_behavior::ModBehaviorPlugin;
 use vx_world::{
     WorldPlugins,
     block::{BlockId, BlockPos},
@@ -21,6 +23,8 @@ impl PluginGroup for VxClientPlugins {
             .add_group(MeshingPlugins)
             .add(LocalPlayerPlugin::default())
             .add(FreeCameraPlugin)
+            .add(CoreModPlugin)
+            .add(ModBehaviorPlugin)
             .add(TempPlugin)
     }
 }

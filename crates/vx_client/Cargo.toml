@@ -8,6 +8,8 @@ bevy = { workspace = true, features = ["free_camera"] }
 
 vx_player.workspace = true
 vx_meshing.workspace = true
+vx_mod.workspace = true
+vx_mod_behavior.workspace = true
 vx_world.workspace = true
 
 [lints]
