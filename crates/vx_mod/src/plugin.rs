@@ -11,7 +11,7 @@ impl CoreModPlugin {
         mut mods: ResMut<LoadedMods>,
         mut load_state: ResMut<NextState<ModLoadState>>,
     ) {
-        let mods_dir = match fs::read_dir("mods/") {
+        let mods_dir = match fs::read_dir("assets/mods/") {
             Ok(mods_dir) => mods_dir,
             Err(err) => {
                 warn!("Failed to load mods directory ({err})");

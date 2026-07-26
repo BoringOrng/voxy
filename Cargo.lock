@@ -5274,6 +5274,7 @@ dependencies = [
  "vx_meshing",
  "vx_mod",
  "vx_mod_behavior",
+ "vx_mod_resource",
  "vx_player",
  "vx_world",
 ]
