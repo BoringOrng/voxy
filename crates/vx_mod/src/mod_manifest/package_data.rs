@@ -1,10 +1,11 @@
+use semver::Version;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct PackageData {
     name: String,
-    version: String,
-    manifest_format: String,
+    version: Version,
+    manifest_format: Version,
 }
 
 impl PackageData {
@@ -14,12 +15,12 @@ impl PackageData {
     }
 
     #[must_use]
-    pub const fn version(&self) -> &String {
+    pub const fn version(&self) -> &Version {
         &self.version
     }
 
     #[must_use]
-    pub const fn manifest_format(&self) -> &String {
+    pub const fn manifest_format(&self) -> &Version {
         &self.manifest_format
     }
 }

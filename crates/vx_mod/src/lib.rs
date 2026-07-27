@@ -1,5 +1,6 @@
 #![feature(iter_collect_into)]
 
+mod error;
 mod load_state;
 mod loaded_mods;
 mod mod_info;

@@ -2,7 +2,7 @@ use std::fs;
 
 use bevy::prelude::*;
 
-use crate::{LoadedMods, ModInfo, ModLoadState, ModManifest};
+use crate::{LoadedMods, ModInfo, ModLoadState};
 
 pub struct CoreModPlugin;
 
@@ -14,49 +14,23 @@ impl CoreModPlugin {
         let mods_dir = match fs::read_dir("assets/mods/") {
             Ok(mods_dir) => mods_dir,
             Err(err) => {
-                warn!("Failed to load mods directory ({err})");
+                warn!("Failed to load mods directory: ({err})");
                 return;
             }
         };
 
         mods_dir
-            .filter_map(|res| {
-                res.inspect_err(|err| {
-                    warn!("couldn't open a mod directory ({err})");
-                })
-                .ok()
-            })
+            .filter_map(Result::ok)
             .map(|entry| entry.path())
-            .filter(|p| {
-                let manifest_exists = p.join("mod.toml").exists();
-
-                if !manifest_exists {
-                    warn!("Couldn't load mod at `{p:?}`, it doesn't have a `mod.toml`");
+            .filter_map(|root| match ModInfo::load(root.clone()) {
+                Ok(info) => {
+                    info!("Successfully parsed mod `{}`!", info.id());
+                    Some(info)
                 }
-
-                manifest_exists
-            })
-            .filter_map(|root| {
-                let manifest = fs::read_to_string(root.join("mod.toml"))
-                    .inspect_err(|err| {
-                        warn!(
-                            "Couldn't load mod at `{root:?}`, failure to load `mod.toml` ({err})"
-                        );
-                    })
-                    .ok()?;
-
-                let parsed: ModManifest = toml::from_str(&manifest)
-                    .inspect_err(|err| {
-                        warn!(
-                            "Couldn't load mod at `{root:?}`, failure to parse `mod.toml` ({err})"
-                        );
-                    })
-                    .ok()?;
-
-                let package_name = parsed.package().name();
-                info!("Successfully parsed mod `{package_name}`!");
-
-                Some(ModInfo::new(package_name.to_owned(), root))
+                Err(err) => {
+                    warn!("Couldn't load mod at `{root:?}`: {err}");
+                    None
+                }
             })
             .collect_into(&mut **mods);
 

@@ -54,7 +54,7 @@ impl ModBehaviorPlugin {
         }
 
         load_state.set(BlockLoadState::Loaded);
-        info!("All blocks loaded!");
+        info!("Loaded {} blocks!", block_registry.len());
     }
 }
 

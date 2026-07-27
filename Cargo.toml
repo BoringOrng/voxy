@@ -24,6 +24,7 @@ log = { version = "0.4", features = [
 serde = { version = "1.0", features = [
     "derive"
 ] }
+thiserror = "2.0"
 
 vx_client.path       = "crates/vx_client"
 vx_entity.path       = "crates/vx_entity"
