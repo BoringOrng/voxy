@@ -1,4 +1,7 @@
-use std::fs;
+use std::{
+    fs::{self, DirEntry},
+    path::Path,
+};
 
 use bevy::prelude::*;
 use vx_mod::{LoadedMods, ModLoadState};
@@ -28,38 +31,50 @@ impl ModResourcePlugin {
                     "`{}` doesn't provide any texture data; skipping",
                     loaded_mod.id()
                 );
+
                 continue;
             };
 
             entries
-                .filter_map(|res| {
-                    res.inspect_err(|err| {
-                        warn!(
-                            "Failed to access a texture for `{}` ({err})",
-                            loaded_mod.id()
-                        );
-                    })
-                    .ok()
-                })
-                .filter(|entry| entry.file_name().to_string_lossy().ends_with(".png"))
-                .map(|entry| {
-                    (
-                        entry
-                            .file_name()
-                            .to_string_lossy()
-                            .split('.')
-                            .next()
-                            .unwrap()
-                            .to_owned(),
-                        asset_server.load(entry.path().strip_prefix("assets").unwrap().to_owned()),
-                    )
-                })
-                .map(|(name, image)| (loaded_mod.id().to_owned() + "::texture::" + &name, image))
+                .filter_map(Result::ok)
+                .filter_map(|entry| Self::try_load_texture(&asset_server, loaded_mod.id(), &entry))
                 .collect_into(&mut **texture_registry);
         }
 
         load_state.set(TextureLoadState::Loaded);
         info!("Loaded {} textures!", texture_registry.len());
+    }
+
+    fn try_load_texture(
+        asset_server: &AssetServer,
+        mod_id: &str,
+        entry: &DirEntry,
+    ) -> Option<(String, Handle<Image>)> {
+        let path = entry.path();
+
+        if !Self::is_image(&path) {
+            warn!("`{}` isn't an image", path.display());
+            return None;
+        }
+
+        // logically, these shouldn't happen but whatever. Stripping the `assets` out of
+        // the path could fail if mods are moved out of the `assets` directory,
+        // currently this is done because the asset server must load there though, so
+        // it's a bit of an iffy situation.
+        let stem = path.file_stem()?.to_string_lossy();
+        let asset_path = path.strip_prefix("assets").ok()?;
+
+        Some((
+            format!("{mod_id}::texture::{stem}"),
+            asset_server.load(asset_path.to_owned()),
+        ))
+    }
+
+    fn is_image(file_name: &Path) -> bool {
+        const EXTENSIONS: &[&str] = &["png", "jpg", "jpeg"];
+        EXTENSIONS
+            .iter()
+            .any(|ext| file_name.extension().is_some_and(|fext| fext == *ext))
     }
 }
 
