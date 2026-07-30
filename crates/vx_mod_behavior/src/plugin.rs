@@ -1,6 +1,6 @@
 use std::{fs, path::Path};
 
-use bevy::prelude::*;
+use bevy::{platform::collections::HashMap, prelude::*};
 use vx_mod::{LoadedMods, ModLoadState};
 
 use crate::{
@@ -20,6 +20,8 @@ impl ModBehaviorPlugin {
         mut block_registry: ResMut<BlockRegistry>,
         mut load_state: ResMut<NextState<BlockLoadState>>,
     ) {
+        let mut raw_block_registry = HashMap::new();
+
         for loaded_mod in loaded_mods.iter() {
             let dir = loaded_mod.root().join("behavior/block/");
             let Ok(entries) = fs::read_dir(&dir) else {
@@ -34,8 +36,10 @@ impl ModBehaviorPlugin {
                         .inspect_err(|err| warn!("{err}"))
                         .ok()
                 })
-                .collect_into(&mut **block_registry);
+                .collect_into(&mut raw_block_registry);
         }
+
+        *block_registry = BlockRegistry::build(raw_block_registry);
 
         load_state.set(BlockLoadState::Loaded);
         info!("Loaded {} blocks!", block_registry.len());
