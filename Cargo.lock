@@ -5316,6 +5316,7 @@ dependencies = [
  "bevy",
  "ron",
  "serde",
+ "thiserror 2.0.19",
  "vx_mod",
 ]
 

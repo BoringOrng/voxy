@@ -1,9 +1,12 @@
-use std::fs;
+use std::{fs, path::Path};
 
 use bevy::prelude::*;
 use vx_mod::{LoadedMods, ModLoadState};
 
-use crate::block::{Block, BlockLoadState, BlockRegistry};
+use crate::{
+    block::{Block, BlockLoadState, BlockRegistry},
+    error::Error,
+};
 
 pub struct ModBehaviorPlugin;
 
@@ -17,44 +20,32 @@ impl ModBehaviorPlugin {
         mut block_registry: ResMut<BlockRegistry>,
         mut load_state: ResMut<NextState<BlockLoadState>>,
     ) {
-        for m in loaded_mods.iter() {
-            let dir = m.root().join("behavior/block/");
+        for loaded_mod in loaded_mods.iter() {
+            let dir = loaded_mod.root().join("behavior/block/");
             let Ok(entries) = fs::read_dir(&dir) else {
-                info!("`{}` doesn't provide any block data; skipping", m.id());
                 continue;
             };
 
             entries
-                .filter_map(|res| {
-                    res.inspect_err(|err| {
-                        warn!(
-                            "Failed to access a piece of block data for `{}` ({err})",
-                            m.id()
-                        );
-                    })
-                    .ok()
-                })
-                .filter_map(|entry| {
-                    fs::read_to_string(entry.path())
-                        .inspect_err(|err| {
-                            warn!("Failed to read block data at `{:?}` ({err})", entry.path());
-                        })
-                        .map(|text| (entry, text))
+                .filter_map(Result::ok)
+                .map(|entry| entry.path())
+                .filter_map(|path| {
+                    Self::try_load_block(&path)
+                        .inspect_err(|err| warn!("{err}"))
                         .ok()
                 })
-                .filter_map(|(entry, text)| {
-                    ron::from_str::<Block>(&text)
-                        .inspect_err(|err| {
-                            warn!("Failed to parse block data at `{:?}` ({err})", entry.path());
-                        })
-                        .ok()
-                })
-                .map(|block| (block.id().to_owned(), block))
                 .collect_into(&mut **block_registry);
         }
 
         load_state.set(BlockLoadState::Loaded);
         info!("Loaded {} blocks!", block_registry.len());
+    }
+
+    fn try_load_block(path: &Path) -> Result<(String, Block), Error> {
+        let block_data = fs::read_to_string(path)?;
+        let parsed: Block = ron::from_str(&block_data)?;
+
+        Ok((parsed.id().to_owned(), parsed))
     }
 }
 
