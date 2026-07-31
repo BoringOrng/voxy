@@ -1,10 +1,10 @@
 use std::{fs, path::Path};
 
-use bevy::{platform::collections::HashMap, prelude::*};
-use vx_mod::{LoadedMods, ModLoadState};
+use bevy::prelude::*;
+use vx_mod::LoadedMods;
 
 use crate::{
-    block::{Block, BlockLoadState, BlockRegistry},
+    block::{Block, BlockRegistry},
     error::Error,
 };
 
@@ -15,34 +15,23 @@ impl ModBehaviorPlugin {
         clippy::needless_pass_by_value,
         reason = "`Res<LoadedMods>` must be passed by value as is required by bevy"
     )]
-    pub fn load_blocks(
-        loaded_mods: Res<LoadedMods>,
-        mut block_registry: ResMut<BlockRegistry>,
-        mut load_state: ResMut<NextState<BlockLoadState>>,
-    ) {
-        let mut raw_block_registry = HashMap::new();
-
-        for loaded_mod in loaded_mods.iter() {
-            let dir = loaded_mod.root().join("behavior/block/");
-            let Ok(entries) = fs::read_dir(&dir) else {
-                continue;
-            };
-
-            entries
-                .filter_map(Result::ok)
-                .map(|entry| entry.path())
-                .filter_map(|path| {
-                    Self::try_load_block(&path)
+    pub fn setup_block_registry(loaded_mods: Res<LoadedMods>, mut commands: Commands) {
+        let raw_block_registry = loaded_mods
+            .iter()
+            .filter_map(|loaded_mod| fs::read_dir(loaded_mod.root().join("behavior/block/")).ok())
+            .flat_map(|entries| {
+                entries.filter_map(|entry| {
+                    Self::try_load_block(&entry.ok()?.path())
                         .inspect_err(|err| warn!("{err}"))
                         .ok()
                 })
-                .collect_into(&mut raw_block_registry);
-        }
+            })
+            .collect();
 
-        *block_registry = BlockRegistry::build(raw_block_registry);
-
-        load_state.set(BlockLoadState::Loaded);
+        let block_registry = BlockRegistry::build(raw_block_registry);
         info!("Loaded {} blocks!", block_registry.len());
+
+        commands.insert_resource(block_registry);
     }
 
     fn try_load_block(path: &Path) -> Result<(String, Block), Error> {
@@ -55,8 +44,9 @@ impl ModBehaviorPlugin {
 
 impl Plugin for ModBehaviorPlugin {
     fn build(&self, app: &mut App) {
-        app.init_state::<BlockLoadState>()
-            .init_resource::<BlockRegistry>()
-            .add_systems(OnEnter(ModLoadState::Loaded), Self::load_blocks);
+        app.add_systems(
+            Update,
+            Self::setup_block_registry.run_if(resource_exists_and_changed::<LoadedMods>),
+        );
     }
 }

@@ -6,13 +6,14 @@ use crate::block::Face;
 #[derive(Clone, Copy)]
 pub struct Quad {
     pos: BlockPos,
+    layer: u32,
     face: Face,
 }
 
 impl Quad {
     #[must_use]
-    pub const fn new(pos: BlockPos, face: Face) -> Self {
-        Self { pos, face }
+    pub const fn new(pos: BlockPos, layer: u32, face: Face) -> Self {
+        Self { pos, layer, face }
     }
 
     #[must_use]
@@ -26,8 +27,8 @@ impl Quad {
     }
 
     #[must_use]
-    pub const fn uvs(self) -> [Vec2; 4] {
-        Face::uv_corners()
+    pub const fn layer(self) -> u32 {
+        self.layer
     }
 
     #[must_use]

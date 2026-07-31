@@ -11,6 +11,16 @@ pub struct BlockMaterial {
     pub(crate) texture: Handle<Image>,
 }
 
+#[derive(Resource, Deref)]
+pub struct SharedBlockMaterial(Handle<BlockMaterial>);
+
+impl SharedBlockMaterial {
+    #[must_use]
+    pub(crate) const fn new(handle: Handle<BlockMaterial>) -> Self {
+        Self(handle)
+    }
+}
+
 impl BlockMaterial {
     pub const ATTRIBUTE_LAYER: MeshVertexAttribute =
         MeshVertexAttribute::new("Layer", 239_723_840_923_589_702, VertexFormat::Uint32);
@@ -34,8 +44,7 @@ impl Material for BlockMaterial {
         let vertex_layout = layout.0.get_layout(&[
             Mesh::ATTRIBUTE_POSITION.at_shader_location(0),
             Mesh::ATTRIBUTE_NORMAL.at_shader_location(1),
-            Mesh::ATTRIBUTE_UV_0.at_shader_location(2),
-            Self::ATTRIBUTE_LAYER.at_shader_location(3),
+            Self::ATTRIBUTE_LAYER.at_shader_location(2),
         ])?;
 
         descriptor.vertex.buffers = vec![vertex_layout];

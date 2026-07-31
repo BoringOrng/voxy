@@ -62,16 +62,6 @@ impl Face {
         }
     }
 
-    #[must_use]
-    pub const fn uv_corners() -> [Vec2; 4] {
-        [
-            Vec2::new(0.0, 0.0),
-            Vec2::new(1.0, 0.0),
-            Vec2::new(1.0, 1.0),
-            Vec2::new(0.0, 1.0),
-        ]
-    }
-
     #[expect(
         clippy::cast_possible_truncation,
         reason = "`Chunk::SIZE.*` should always fit within an `u8`"

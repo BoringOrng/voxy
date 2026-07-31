@@ -10,12 +10,18 @@
 @group(#{MATERIAL_BIND_GROUP}) @binding(0) var block_texture_array: texture_2d_array<f32>;
 @group(#{MATERIAL_BIND_GROUP}) @binding(1) var block_texture_array_sampler: sampler;
 
+const UVS = array(
+    vec2f(0.0, 0.0),
+    vec2f(1.0, 0.0),
+    vec2f(1.0, 1.0),
+    vec2f(0.0, 1.0),
+);
+
 struct Vertex {
     @builtin(instance_index) instance_index: u32,
     @location(0) position: vec3<f32>,
     @location(1) normal: vec3<f32>,
-    @location(2) uv: vec2<f32>,
-    @location(3) layer: u32,
+    @location(2) layer: u32,
 };
 
 struct VertexOutput {
@@ -27,14 +33,17 @@ struct VertexOutput {
 };
 
 @vertex
-fn vertex(vertex: Vertex) -> VertexOutput {
+fn vertex(
+    @builtin(vertex_index) vertex_index: u32,
+    vertex: Vertex,
+) -> VertexOutput {
     var out: VertexOutput;
     let world_from_local = get_world_from_local(vertex.instance_index);
 
     out.world_position = mesh_position_local_to_world(world_from_local, vec4<f32>(vertex.position, 1.0));
     out.position = mesh_position_local_to_clip(world_from_local, vec4<f32>(vertex.position, 1.0));
     out.world_normal = mesh_normal_local_to_world(vertex.normal, vertex.instance_index);
-    out.uv = vertex.uv;
+    out.uv = UVS[vertex_index % 4u];
     out.layer = vertex.layer;
 
     return out;

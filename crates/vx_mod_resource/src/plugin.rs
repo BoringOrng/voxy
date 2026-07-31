@@ -3,10 +3,10 @@ use std::{
     path::Path,
 };
 
-use bevy::prelude::*;
-use vx_mod::{LoadedMods, ModLoadState};
+use bevy::{platform::collections::HashMap, prelude::*};
+use vx_mod::LoadedMods;
 
-use crate::{TextureLoadState, TextureRegistry, block_array::BlockTextureArray};
+use crate::{TextureRegistry, block_array::BlockTextureArray};
 
 pub struct ModResourcePlugin;
 
@@ -18,31 +18,28 @@ impl ModResourcePlugin {
             is required by bevy
         "
     )]
-    fn load_textures(
+    fn setup_texture_registry(
         loaded_mods: Res<LoadedMods>,
         asset_server: Res<AssetServer>,
-        mut texture_registry: ResMut<TextureRegistry>,
-        mut load_state: ResMut<NextState<TextureLoadState>>,
+        mut commands: Commands,
     ) {
-        for loaded_mod in loaded_mods.iter() {
-            let dir = loaded_mod.root().join("resource/texture");
-            let Ok(entries) = fs::read_dir(&dir) else {
-                info!(
-                    "`{}` doesn't provide any texture data; skipping",
-                    loaded_mod.id()
-                );
+        let raw_texture_registry: HashMap<_, _> = loaded_mods
+            .iter()
+            .filter_map(|loaded_mod| {
+                Some((
+                    fs::read_dir(loaded_mod.root().join("resource/texture/")).ok()?,
+                    loaded_mod.id(),
+                ))
+            })
+            .flat_map(|(entries, mod_id)| {
+                entries
+                    .filter_map(Result::ok)
+                    .filter_map(|entry| Self::try_load_texture(&asset_server, mod_id, &entry))
+            })
+            .collect();
 
-                continue;
-            };
-
-            entries
-                .filter_map(Result::ok)
-                .filter_map(|entry| Self::try_load_texture(&asset_server, loaded_mod.id(), &entry))
-                .collect_into(&mut **texture_registry);
-        }
-
-        load_state.set(TextureLoadState::Loaded);
-        info!("Loaded {} textures!", texture_registry.len());
+        info!("Loaded {} textures!", raw_texture_registry.len());
+        commands.insert_resource(TextureRegistry::new(raw_texture_registry));
     }
 
     fn try_load_texture(
@@ -84,8 +81,8 @@ impl ModResourcePlugin {
             be passed by value as is required by bevy
         "
     )]
-    fn load_block_texture_array(
-        texture_registry: Res<TextureRegistry>,
+    fn setup_block_texture_array(
+        texture_registry: If<Res<TextureRegistry>>,
         asset_server: Res<AssetServer>,
         images: Res<Assets<Image>>,
         mut commands: Commands,
@@ -103,19 +100,25 @@ impl ModResourcePlugin {
             &images,
         ));
     }
+
+    fn invalidate_texture_array(mut commands: Commands) {
+        commands.remove_resource::<BlockTextureArray>();
+    }
 }
 
 impl Plugin for ModResourcePlugin {
     fn build(&self, app: &mut App) {
-        app.init_state::<TextureLoadState>()
-            .init_resource::<TextureRegistry>()
-            .add_systems(OnEnter(ModLoadState::Loaded), Self::load_textures)
-            .add_systems(
-                Update,
-                Self::load_block_texture_array.run_if(
-                    in_state(TextureLoadState::Loaded)
-                        .and_then(not(resource_exists::<BlockTextureArray>)),
-                ),
-            );
+        app.add_systems(
+            Update,
+            Self::setup_texture_registry.run_if(resource_exists_and_changed::<LoadedMods>),
+        )
+        .add_systems(
+            Update,
+            Self::invalidate_texture_array.run_if(resource_exists_and_changed::<TextureRegistry>),
+        )
+        .add_systems(
+            Update,
+            Self::setup_block_texture_array.run_if(not(resource_exists::<BlockTextureArray>)),
+        );
     }
 }

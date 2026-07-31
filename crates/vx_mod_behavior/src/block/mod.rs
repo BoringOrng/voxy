@@ -1,11 +1,9 @@
 use serde::Deserialize;
 
 pub mod geometry;
-mod load_state;
 mod registry;
 
 pub use geometry::BlockGeometry;
-pub use load_state::BlockLoadState;
 pub use registry::BlockRegistry;
 
 #[derive(Debug, Deserialize)]
