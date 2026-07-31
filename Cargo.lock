@@ -5295,6 +5295,8 @@ name = "vx_meshing"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "vx_mod_behavior",
+ "vx_mod_resource",
  "vx_world",
 ]
 

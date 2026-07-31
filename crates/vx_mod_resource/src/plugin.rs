@@ -6,7 +6,7 @@ use std::{
 use bevy::prelude::*;
 use vx_mod::{LoadedMods, ModLoadState};
 
-use crate::{TextureLoadState, TextureRegistry};
+use crate::{TextureLoadState, TextureRegistry, block_array::BlockTextureArray};
 
 pub struct ModResourcePlugin;
 
@@ -76,12 +76,46 @@ impl ModResourcePlugin {
             .iter()
             .any(|ext| file_name.extension().is_some_and(|fext| fext == *ext))
     }
+
+    #[expect(
+        clippy::needless_pass_by_value,
+        reason = "
+            `Res<LoadedMods>`, `Res<AssetServer>`, and `Res<Assets<Image>>` must
+            be passed by value as is required by bevy
+        "
+    )]
+    fn load_block_texture_array(
+        texture_registry: Res<TextureRegistry>,
+        asset_server: Res<AssetServer>,
+        images: Res<Assets<Image>>,
+        mut commands: Commands,
+    ) {
+        if texture_registry
+            .values()
+            .any(|img| !asset_server.is_loaded(img))
+        {
+            return;
+        }
+
+        commands.insert_resource(BlockTextureArray::build(
+            &texture_registry,
+            &asset_server,
+            &images,
+        ));
+    }
 }
 
 impl Plugin for ModResourcePlugin {
     fn build(&self, app: &mut App) {
         app.init_state::<TextureLoadState>()
             .init_resource::<TextureRegistry>()
-            .add_systems(OnEnter(ModLoadState::Loaded), Self::load_textures);
+            .add_systems(OnEnter(ModLoadState::Loaded), Self::load_textures)
+            .add_systems(
+                Update,
+                Self::load_block_texture_array.run_if(
+                    in_state(TextureLoadState::Loaded)
+                        .and_then(not(resource_exists::<BlockTextureArray>)),
+                ),
+            );
     }
 }

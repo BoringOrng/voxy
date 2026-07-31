@@ -26,6 +26,11 @@ impl Quad {
     }
 
     #[must_use]
+    pub const fn uvs(self) -> [Vec2; 4] {
+        Face::uv_corners()
+    }
+
+    #[must_use]
     pub fn positions(self) -> [Vec3; 4] {
         self.face().corners().map(|c| c + self.pos().as_vec3())
     }

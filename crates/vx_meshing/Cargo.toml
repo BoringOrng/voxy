@@ -7,6 +7,8 @@ edition = "2024"
 bevy.workspace = true
 
 vx_world.workspace = true
+vx_mod_behavior.workspace = true
+vx_mod_resource.workspace = true
 
 [lints]
 workspace = true

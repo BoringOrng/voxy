@@ -45,7 +45,7 @@ impl BlockRegistry {
 
     #[must_use]
     pub fn get_block(&self, id: BlockId) -> &Block {
-        &self.by_block_id[id.raw().get() as usize]
+        &self.by_block_id[id.raw().get() as usize - 1]
     }
 
     #[must_use]

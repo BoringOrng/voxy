@@ -53,13 +53,23 @@ impl Face {
         ];
 
         match self {
-            Self::Up => c![3, 7, 6, 2],
-            Self::Down => c![4, 0, 1, 5],
-            Self::North => c![1, 0, 3, 2],
-            Self::South => c![4, 5, 6, 7],
-            Self::East => c![1, 2, 6, 5],
-            Self::West => c![4, 7, 3, 0],
+            Self::Up => c![2, 3, 7, 6],
+            Self::Down => c![0, 1, 5, 4],
+            Self::North => c![3, 2, 1, 0],
+            Self::South => c![6, 7, 4, 5],
+            Self::East => c![2, 6, 5, 1],
+            Self::West => c![7, 3, 0, 4],
         }
+    }
+
+    #[must_use]
+    pub const fn uv_corners() -> [Vec2; 4] {
+        [
+            Vec2::new(0.0, 0.0),
+            Vec2::new(1.0, 0.0),
+            Vec2::new(1.0, 1.0),
+            Vec2::new(0.0, 1.0),
+        ]
     }
 
     #[expect(
