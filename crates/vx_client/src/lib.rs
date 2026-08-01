@@ -43,7 +43,7 @@ fn spawn_temp_mesh(mut commands: Commands) {
     let mut chunk_data = ChunkData::default();
     chunk_data.insert(
         BlockPos::new(0, 0, 0),
-        BlockId::from_raw(2.try_into().expect("one isn't zero")),
+        BlockId::from_raw(2.try_into().expect("two isn't zero")),
     );
     chunk_data.insert(
         BlockPos::new(16, 16, 16),
@@ -51,11 +51,11 @@ fn spawn_temp_mesh(mut commands: Commands) {
     );
     chunk_data.insert(
         BlockPos::new(17, 16, 16),
-        BlockId::from_raw(2.try_into().expect("one isn't zero")),
+        BlockId::from_raw(2.try_into().expect("two isn't zero")),
     );
     chunk_data.insert(
         BlockPos::new(16, 17, 16),
-        BlockId::from_raw(2.try_into().expect("one isn't zero")),
+        BlockId::from_raw(2.try_into().expect("two isn't zero")),
     );
 
     commands.spawn((DirtyChunk, chunk_data));
