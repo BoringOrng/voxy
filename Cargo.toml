@@ -21,13 +21,20 @@ log = { version = "0.4", features = [
     "max_level_debug",
     "release_max_level_warn",
 ] }
+serde = { version = "1.0", features = [
+    "derive"
+] }
+thiserror = "2.0"
 
-vx_client.path  = "crates/vx_client"
-vx_entity.path  = "crates/vx_entity"
-vx_meshing.path = "crates/vx_meshing"
-vx_player.path  = "crates/vx_player"
-vx_server.path  = "crates/vx_server"
-vx_world.path   = "crates/vx_world"
+vx_client.path       = "crates/vx_client"
+vx_entity.path       = "crates/vx_entity"
+vx_meshing.path      = "crates/vx_meshing"
+vx_mod.path          = "crates/vx_mod"
+vx_mod_behavior.path = "crates/vx_mod_behavior"
+vx_mod_resource.path = "crates/vx_mod_resource"
+vx_player.path       = "crates/vx_player"
+vx_server.path       = "crates/vx_server"
+vx_world.path        = "crates/vx_world"
 
 [workspace.lints.clippy]
 pedantic = "warn"

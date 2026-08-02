@@ -1,14 +1,17 @@
 [package]
-name = "vx_meshing"
+name = "vx_mod_behavior"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
 bevy.workspace = true
+serde.workspace = true
+thiserror.workspace = true
 
+ron = "0.12.2"
+
+vx_mod.workspace = true
 vx_world.workspace = true
-vx_mod_behavior.workspace = true
-vx_mod_resource.workspace = true
 
 [lints]
 workspace = true

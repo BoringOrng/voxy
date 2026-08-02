@@ -1,5 +1,5 @@
 Block(
-    id: "voxy::block::dirt",
+    id: "voxy:dirt",
 
     geometry: Cube(
         top: Texture("voxy::texture::dirt"),

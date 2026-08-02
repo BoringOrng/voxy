@@ -1,5 +1,5 @@
 Block(
-    id: "voxy::block::grass",
+    id: "voxy:grass",
 
     geometry: Cube(
         top: ColorMapped(

@@ -18,7 +18,11 @@ impl LocalPlayerPlugin {
 
     #[expect(clippy::needless_pass_by_value)]
     fn spawn_local_player(mut commands: Commands, player_name: Res<PlayerName>) {
-        commands.spawn((LocalPlayer, Name::new(player_name.0.clone())));
+        commands.spawn((
+            LocalPlayer,
+            Name::new(player_name.0.clone()),
+            Transform::from_xyz(20., 20., 20.).looking_at(Vec3::ZERO, Vec3::Y),
+        ));
     }
 }
 
