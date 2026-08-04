@@ -2,6 +2,7 @@
 
 !/assets
 !/crates
+!/docs
 !/src
 
 !/Cargo.*
@@ -10,4 +11,5 @@
 !/rustfmt.toml
 !/LICENSE-APACHE
 !/LICENSE-MIT
+!/README.md
 !/.gitignore
