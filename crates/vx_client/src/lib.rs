@@ -21,6 +21,7 @@ impl PluginGroup for VxClientPlugins {
         PluginGroupBuilder::start::<Self>()
             .add_group(DefaultPlugins)
             .add_group(WorldPlugins)
+            .add_group(vx_mod_resource::Plugins)
             .add_group(MeshingPlugins)
             .add(LocalPlayerPlugin::default())
             .add(FreeCameraPlugin)
