@@ -15,6 +15,9 @@ pub trait Loader: Sized + Send + Sync + 'static {
 
     fn extensions() -> &'static [&'static str];
 
+    /// # Errors
+    ///
+    /// Returns the associated [`Loader::Error`] when loading the asset fails.
     fn try_load(path: &Path, asset_server: &AssetServer) -> Result<Self::Asset, Self::Error>;
 
     // anyone looking to implement this should take note that this is *only* true
@@ -26,6 +29,7 @@ pub trait Loader: Sized + Send + Sync + 'static {
         true
     }
 
+    #[must_use]
     fn matches_extension(path: &Path) -> bool {
         Self::extensions()
             .iter()
