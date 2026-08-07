@@ -24,6 +24,7 @@ serde = { version = "1.0", features = [
 thiserror = "2.0"
 
 vx_client.path       = "crates/vx_client"
+vx_climate.path      = "crates/vx_climate"
 vx_entity.path       = "crates/vx_entity"
 vx_meshing.path      = "crates/vx_meshing"
 vx_mod.path          = "crates/vx_mod"
@@ -41,8 +42,9 @@ nursery  = "warn"
 bevy.workspace = true
 clap = { version = "4.6.4", features = ["derive"] }
 
-vx_client.workspace = true
-vx_server.workspace = true
+vx_client.workspace  = true
+vx_climate.workspace = true
+vx_server.workspace  = true
 
 [profile.dev]
 codegen-backend = "cranelift"

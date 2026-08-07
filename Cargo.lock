@@ -3297,6 +3297,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "noiz"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "937ac4a1ea826fc4977c4db2629fa1278e998012c24e7f9c2be32020c66d7815"
+dependencies = [
+ "bevy_math",
+ "bevy_reflect",
+ "serde",
+]
+
+[[package]]
 name = "nonmax"
 version = "0.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4821,6 +4832,7 @@ dependencies = [
  "bevy",
  "clap",
  "vx_client",
+ "vx_climate",
  "vx_server",
 ]
 
@@ -4829,12 +4841,21 @@ name = "vx_client"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "vx_climate",
  "vx_meshing",
  "vx_mod",
  "vx_mod_behavior",
  "vx_mod_resource",
  "vx_player",
  "vx_world",
+]
+
+[[package]]
+name = "vx_climate"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "noiz",
 ]
 
 [[package]]

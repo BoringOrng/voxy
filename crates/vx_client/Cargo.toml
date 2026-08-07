@@ -11,6 +11,7 @@ bevy = { workspace = true, features = [
   "zstd_rust",
 ] }
 
+vx_climate.workspace = true
 vx_player.workspace = true
 vx_meshing.workspace = true
 vx_mod.workspace = true

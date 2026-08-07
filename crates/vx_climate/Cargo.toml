@@ -1,0 +1,11 @@
+[package]
+name = "vx_climate"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy.workspace = true
+noiz = "0.5.0"
+
+[lints]
+workspace = true

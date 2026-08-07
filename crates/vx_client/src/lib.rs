@@ -1,4 +1,5 @@
 use bevy::{app::PluginGroupBuilder, camera_controller::free_camera::FreeCameraPlugin, prelude::*};
+use vx_climate::ClimatePlugin;
 use vx_meshing::{MeshingPlugins, chunk::DirtyChunk};
 use vx_mod::CoreModPlugin;
 use vx_mod_behavior::ModBehaviorPlugin;
@@ -26,6 +27,7 @@ impl PluginGroup for VxClientPlugins {
             .add(FreeCameraPlugin)
             .add(CoreModPlugin)
             .add(ModBehaviorPlugin)
+            .add(ClimatePlugin)
             .add(TempPlugin)
     }
 }
