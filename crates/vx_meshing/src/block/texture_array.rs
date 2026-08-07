@@ -5,20 +5,21 @@ use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
 };
+use vx_mod_resource::loader;
 
-#[derive(Clone, Resource, Debug)]
-pub struct BlockTextureArray {
-    id_mapping: HashMap<String, u32>,
+#[derive(Resource)]
+pub struct TextureArray {
+    by_id: HashMap<String, u32>,
     texture: Handle<Image>,
 }
 
-impl BlockTextureArray {
+impl TextureArray {
     #[expect(
         clippy::cast_possible_truncation,
         reason = "anything beyond u32::MAX would break the texture array"
     )]
     pub(crate) fn build(
-        textures: &HashMap<String, Handle<Image>>,
+        textures: &vx_mod_resource::Registry<loader::TextureLoader>,
         asset_server: &AssetServer,
         images: &Assets<Image>,
     ) -> Self {
@@ -34,31 +35,34 @@ impl BlockTextureArray {
                     .expect("this should be run after all images are loaded")
                     .width()
             })
-            .expect("should have at least on block texture");
+            .expect("should have at least one block texture");
 
         let mut data = Vec::with_capacity((tile_size * tile_size * 4 * layer_count) as usize);
-        let mut id_mapping = HashMap::new();
+        let mut by_id = HashMap::new();
 
         for (i, &id) in ids.iter().enumerate() {
             let image = images
                 .get(&textures[id])
                 .expect("this should be run after all images are loaded");
 
-            assert_eq!(
-                image.width(),
-                tile_size,
-                "texture `{id}` doesn't match expected tile size {tile_size}"
-            );
-            assert_eq!(image.height(), tile_size);
+            if image.width() != image.height() {
+                warn!("texture `{id}` should be a square; skipping");
+                continue;
+            }
+
+            if image.width() != tile_size {
+                warn!("texture `{id}` doesn't match expected tile size: {tile_size}; skipping");
+                continue;
+            }
 
             data.extend_from_slice(
                 image
                     .data
                     .as_deref()
-                    .expect("block textures shouldn't be storage textures"),
+                    .expect("block_textures shouldn't be storage textures"),
             );
 
-            id_mapping.insert(id.clone(), i as u32);
+            by_id.insert(id.clone(), i as u32);
         }
 
         let mut image = Image::new(
@@ -75,12 +79,12 @@ impl BlockTextureArray {
 
         image
             .reinterpret_stacked_2d_as_array(layer_count)
-            .expect("Should be able to convert all images to a texture array");
+            .expect("texture should be 2d, have one layer, and be evenly divideable by tile_size");
 
         image.sampler = ImageSampler::nearest();
 
         Self {
-            id_mapping,
+            by_id,
             texture: asset_server.add(image),
         }
     }
@@ -92,6 +96,6 @@ impl BlockTextureArray {
 
     #[must_use]
     pub fn get_index(&self, texture_name: &str) -> Option<u32> {
-        self.id_mapping.get(texture_name).copied()
+        self.by_id.get(texture_name).copied()
     }
 }

@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use vx_mod_behavior::block::{Block, BlockGeometry, BlockRegistry, geometry::SidesTexture};
-use vx_mod_resource::BlockTextureArray;
 use vx_world::{
     block::BlockPos,
     chunk::{ChunkData, ChunkMap, ChunkPos},
@@ -8,7 +7,7 @@ use vx_world::{
 
 use crate::{
     Quad,
-    block::{BlockSampler, Face, SharedBlockMaterial},
+    block::{self, BlockSampler, Face, SharedBlockMaterial},
     chunk::{DirtyChunk, mesh::ChunkMesh},
 };
 
@@ -33,7 +32,7 @@ impl ChunkMeshingPlugin {
     fn generate_quads(
         mut commands: Commands,
         block_registry: If<Res<BlockRegistry>>,
-        block_texture_array: If<Res<BlockTextureArray>>,
+        block_texture_array: If<Res<block::TextureArray>>,
         chunk_map: Res<ChunkMap>,
         chunk_data_q: Query<&ChunkData>,
         dirty_chunks: Query<(Entity, &ChunkPos), With<DirtyChunk>>,

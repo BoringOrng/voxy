@@ -1,7 +1,8 @@
-mod block_array;
-mod plugin;
-mod texture_map;
+pub mod loader;
+pub mod registry;
 
-pub use block_array::BlockTextureArray;
-pub use plugin::ModResourcePlugin;
-pub use texture_map::TextureRegistry;
+mod plugins;
+
+pub(crate) use loader::Loader;
+pub use plugins::Plugins;
+pub use registry::Registry;
