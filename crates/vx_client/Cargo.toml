@@ -4,7 +4,12 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy = { workspace = true, features = ["free_camera"] }
+bevy = { workspace = true, features = [
+  "free_camera",
+  "default_platform",
+  "tonemapping_luts",
+  "zstd_rust",
+] }
 
 vx_player.workspace = true
 vx_meshing.workspace = true

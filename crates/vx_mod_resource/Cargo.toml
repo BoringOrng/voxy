@@ -4,7 +4,11 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy.workspace = true
+bevy = { workspace = true, features = [
+  "bevy_image",
+  "png",
+  "jpeg",
+] }
 serde.workspace = true
 thiserror.workspace = true
 

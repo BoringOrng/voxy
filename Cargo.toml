@@ -13,10 +13,7 @@ members = ["crates/vx_*"]
 workspace = true
 
 [workspace.dependencies]
-bevy = { version = "0.19", features = [
-    "3d",
-    "audio",
-] }
+bevy = { version = "0.19", default-features = false, features = ["default_app"] }
 log = { version = "0.4", features = [
     "max_level_debug",
     "release_max_level_warn",
