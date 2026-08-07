@@ -1,13 +1,12 @@
 [package]
-name = "vx_player"
+name = "vx_streaming"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
 bevy.workspace = true
 
-vx_entity.workspace = true
-vx_streaming.workspace = true
+vx_world.workspace = true
 
 [lints]
 workspace = true

@@ -3,6 +3,7 @@ use vx_climate::ClimatePlugin;
 use vx_meshing::{MeshingPlugins, chunk::DirtyChunk};
 use vx_mod::CoreModPlugin;
 use vx_mod_behavior::ModBehaviorPlugin;
+use vx_streaming::StreamingPlugin;
 use vx_world::{
     WorldPlugins,
     block::{BlockId, BlockPos},
@@ -28,6 +29,7 @@ impl PluginGroup for VxClientPlugins {
             .add(CoreModPlugin)
             .add(ModBehaviorPlugin)
             .add(ClimatePlugin)
+            .add(StreamingPlugin)
             .add(TempPlugin)
     }
 }

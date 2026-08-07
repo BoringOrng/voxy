@@ -4847,6 +4847,7 @@ dependencies = [
  "vx_mod_behavior",
  "vx_mod_resource",
  "vx_player",
+ "vx_streaming",
  "vx_world",
 ]
 
@@ -4915,6 +4916,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "vx_entity",
+ "vx_streaming",
 ]
 
 [[package]]
@@ -4922,6 +4924,14 @@ name = "vx_server"
 version = "0.1.0"
 dependencies = [
  "bevy",
+]
+
+[[package]]
+name = "vx_streaming"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "vx_world",
 ]
 
 [[package]]

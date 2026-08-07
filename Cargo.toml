@@ -32,6 +32,7 @@ vx_mod_behavior.path = "crates/vx_mod_behavior"
 vx_mod_resource.path = "crates/vx_mod_resource"
 vx_player.path       = "crates/vx_player"
 vx_server.path       = "crates/vx_server"
+vx_streaming.path    = "crates/vx_streaming"
 vx_world.path        = "crates/vx_world"
 
 [workspace.lints.clippy]
