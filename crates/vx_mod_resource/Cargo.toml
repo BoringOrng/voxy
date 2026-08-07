@@ -7,7 +7,7 @@ edition = "2024"
 bevy = { workspace = true, features = [
   "bevy_image",
   "png",
-  "bevy_render",
+  "jpeg",
 ] }
 serde.workspace = true
 thiserror.workspace = true
