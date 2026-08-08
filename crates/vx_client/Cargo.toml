@@ -14,6 +14,7 @@ bevy = { workspace = true, features = [
 ] }
 
 vx_climate.workspace = true
+vx_entity.workspace = true
 vx_player.workspace = true
 vx_meshing.workspace = true
 vx_mod.workspace = true

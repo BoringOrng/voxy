@@ -1,12 +1,9 @@
 [package]
-name = "vx_entity"
+name = "vx_worldgen"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy.workspace = true
-
-vx_world.workspace = true
 
 [lints]
 workspace = true

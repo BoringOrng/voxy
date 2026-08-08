@@ -4843,6 +4843,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "vx_climate",
+ "vx_entity",
  "vx_meshing",
  "vx_mod",
  "vx_mod_behavior",
@@ -4865,6 +4866,7 @@ name = "vx_entity"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "vx_world",
 ]
 
 [[package]]
@@ -4941,6 +4943,10 @@ version = "0.1.0"
 dependencies = [
  "bevy",
 ]
+
+[[package]]
+name = "vx_worldgen"
+version = "0.1.0"
 
 [[package]]
 name = "walkdir"
