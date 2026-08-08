@@ -1,5 +1,5 @@
 use bevy::{math::bounding::Aabb3d, platform::collections::HashSet, prelude::*};
-use vx_world::chunk::{ChunkMap, ChunkPos};
+use vx_world::chunk::{Chunk, ChunkMap, ChunkPos};
 
 pub struct StreamingPlugin;
 
@@ -29,8 +29,6 @@ impl StreamingPlugin {
         for drop_pos in to_drop {
             let chunk_entity = chunk_map.remove(&drop_pos).unwrap();
             commands.entity(chunk_entity).despawn();
-
-            info!("dropped chunk at {drop_pos:?}");
         }
     }
 
@@ -64,7 +62,13 @@ impl StreamingPlugin {
                     .map(|(x, y, z)| ChunkPos::new(IVec3::new(x, y, z)))
                     .filter(move |pos| !to_ignore.contains(pos))
             })
-            .map(|chunk_pos| (chunk_pos, super::PendingGeneration))
+            .map(|chunk_pos| {
+                (
+                    chunk_pos,
+                    Transform::from_translation(chunk_pos.as_vec3() * Chunk::SIZE.as_vec3()),
+                    super::PendingGeneration,
+                )
+            })
             .collect();
 
         commands.spawn_batch(to_spawn);

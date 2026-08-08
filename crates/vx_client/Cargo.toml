@@ -9,6 +9,8 @@ bevy = { workspace = true, features = [
   "default_platform",
   "tonemapping_luts",
   "zstd_rust",
+  "bevy_gizmos",
+  "bevy_gizmos_render",
 ] }
 
 vx_climate.workspace = true
