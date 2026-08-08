@@ -5,6 +5,11 @@ pub struct ChunkPos(IVec3);
 
 impl ChunkPos {
     #[must_use]
+    pub const fn new(pos: IVec3) -> Self {
+        Self(pos)
+    }
+
+    #[must_use]
     pub fn from_vec3(pos: Vec3) -> Self {
         Self(pos.as_ivec3().div_euclid(super::Chunk::SIZE.as_ivec3()))
     }
