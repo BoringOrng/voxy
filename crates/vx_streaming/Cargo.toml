@@ -8,5 +8,7 @@ bevy.workspace = true
 
 vx_world.workspace = true
 
+crossbeam-channel = "0.5.16"
+
 [lints]
 workspace = true
