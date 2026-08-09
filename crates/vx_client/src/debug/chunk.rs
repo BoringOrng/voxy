@@ -1,17 +1,21 @@
 use bevy::{color::palettes::css, prelude::*};
-use vx_meshing::chunk::DirtyChunk;
-use vx_streaming::PendingGeneration;
-use vx_world::chunk::{Chunk, ChunkPos};
+use vx_world::chunk::{Chunk, ChunkPos, chunk_state};
 
 #[derive(Default)]
 pub struct ChunkDebugPlugin;
 
+type GeneratedChunk = (
+    With<Chunk>,
+    Without<chunk_state::NeedsWorldgen>,
+    Without<chunk_state::NeedsMeshing>,
+);
+
 impl ChunkDebugPlugin {
     fn draw_chunk_bounds(
         mut gizmos: Gizmos,
-        pending: Query<&ChunkPos, With<PendingGeneration>>,
-        dirty: Query<&ChunkPos, With<DirtyChunk>>,
-        ready: Query<&ChunkPos, (With<Chunk>, Without<PendingGeneration>, Without<DirtyChunk>)>,
+        pending: Query<&ChunkPos, With<chunk_state::NeedsWorldgen>>,
+        dirty: Query<&ChunkPos, With<chunk_state::NeedsMeshing>>,
+        ready: Query<&ChunkPos, GeneratedChunk>,
     ) {
         for &pos in &pending {
             Self::draw_chunk(&mut gizmos, pos, css::ORANGE.into());

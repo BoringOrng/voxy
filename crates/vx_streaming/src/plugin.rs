@@ -1,5 +1,5 @@
 use bevy::{math::bounding::Aabb3d, platform::collections::HashSet, prelude::*};
-use vx_world::chunk::{Chunk, ChunkMap, ChunkPos};
+use vx_world::chunk::{Chunk, ChunkMap, ChunkPos, chunk_state};
 
 pub struct StreamingPlugin;
 
@@ -66,7 +66,7 @@ impl StreamingPlugin {
                 (
                     chunk_pos,
                     Transform::from_translation(chunk_pos.as_vec3() * Chunk::SIZE.as_vec3()),
-                    super::PendingGeneration,
+                    chunk_state::NeedsWorldgen,
                 )
             })
             .collect();

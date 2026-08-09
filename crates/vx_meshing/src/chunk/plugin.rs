@@ -2,13 +2,13 @@ use bevy::prelude::*;
 use vx_mod_behavior::block::{Block, BlockGeometry, BlockRegistry, geometry::SidesTexture};
 use vx_world::{
     block::BlockPos,
-    chunk::{ChunkData, ChunkMap, ChunkPos},
+    chunk::{ChunkData, ChunkMap, ChunkPos, chunk_state},
 };
 
 use crate::{
     Quad,
     block::{self, BlockSampler, Face, SharedBlockMaterial},
-    chunk::{DirtyChunk, mesh::ChunkMesh},
+    chunk::mesh::ChunkMesh,
 };
 
 #[derive(Clone, Copy, Default)]
@@ -35,7 +35,7 @@ impl ChunkMeshingPlugin {
         block_texture_array: If<Res<block::TextureArray>>,
         chunk_map: Res<ChunkMap>,
         chunk_data_q: Query<&ChunkData>,
-        dirty_chunks: Query<(Entity, &ChunkPos), With<DirtyChunk>>,
+        dirty_chunks: Query<(Entity, &ChunkPos), With<chunk_state::NeedsMeshing>>,
     ) {
         let block_texture_array = &block_texture_array.into_inner();
 
@@ -76,7 +76,7 @@ impl ChunkMeshingPlugin {
             commands
                 .entity(chunk_entity)
                 .insert(PendingMesh(quads))
-                .remove::<DirtyChunk>();
+                .remove::<chunk_state::NeedsMeshing>();
         }
     }
 
