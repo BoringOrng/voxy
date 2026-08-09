@@ -35,6 +35,7 @@ impl ChunkMeshingPlugin {
         block_texture_array: If<Res<block::TextureArray>>,
         chunk_map: Res<ChunkMap>,
         chunk_data_q: Query<&ChunkData>,
+        needs_worldgen: Query<(), With<chunk_state::NeedsWorldgen>>,
         dirty_chunks: Query<(Entity, &ChunkPos), With<chunk_state::NeedsMeshing>>,
     ) {
         let block_texture_array = &block_texture_array.into_inner();
@@ -44,11 +45,27 @@ impl ChunkMeshingPlugin {
                 .get(chunk_entity)
                 .expect("All chunk entities should have an associated `ChunkData`");
 
+            // otherwise we get use-after-frees
+            if chunk_data.is_empty() {
+                commands
+                    .entity(chunk_entity)
+                    .remove::<chunk_state::NeedsMeshing>();
+
+                continue;
+            }
+
+            let adjacent_chunks = chunk_map.adjacent_to(chunk_pos);
+
+            if !adjacent_chunks
+                .iter()
+                .all(|e| e.is_some_and(|e| !needs_worldgen.contains(e)))
+            {
+                continue;
+            }
+
             let sampler = &BlockSampler::new(
                 chunk_data,
-                chunk_map
-                    .adjacent_to(chunk_pos)
-                    .map(|e| e.and_then(|e| chunk_data_q.get(e).ok())),
+                adjacent_chunks.map(|e| e.and_then(|e| chunk_data_q.get(e).ok())),
             );
 
             let quads = chunk_data

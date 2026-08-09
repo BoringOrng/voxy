@@ -26,6 +26,11 @@ impl ChunkData {
     pub const fn insert(&mut self, pos: BlockPos, block: BlockId) -> Option<BlockId> {
         self.blocks[pos.raw() as usize].replace(block)
     }
+
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.blocks.iter().all(Option::is_none)
+    }
 }
 
 impl Default for ChunkData {

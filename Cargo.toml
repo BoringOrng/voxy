@@ -34,6 +34,7 @@ vx_player.path       = "crates/vx_player"
 vx_server.path       = "crates/vx_server"
 vx_streaming.path    = "crates/vx_streaming"
 vx_world.path        = "crates/vx_world"
+vx_worldgen.path     = "crates/vx_worldgen"
 
 [workspace.lints.clippy]
 pedantic = "warn"

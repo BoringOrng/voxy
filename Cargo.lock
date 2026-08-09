@@ -4851,6 +4851,7 @@ dependencies = [
  "vx_player",
  "vx_streaming",
  "vx_world",
+ "vx_worldgen",
 ]
 
 [[package]]
@@ -4947,6 +4948,11 @@ dependencies = [
 [[package]]
 name = "vx_worldgen"
 version = "0.1.0"
+dependencies = [
+ "bevy",
+ "vx_mod_behavior",
+ "vx_world",
+]
 
 [[package]]
 name = "walkdir"

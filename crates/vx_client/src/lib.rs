@@ -6,6 +6,7 @@ use vx_mod::CoreModPlugin;
 use vx_mod_behavior::ModBehaviorPlugin;
 use vx_streaming::StreamingPlugin;
 use vx_world::WorldPlugins;
+use vx_worldgen::WorldgenPlugin;
 
 mod debug;
 pub mod player;
@@ -30,5 +31,6 @@ impl PluginGroup for VxClientPlugins {
             .add(ModBehaviorPlugin)
             .add(ClimatePlugin)
             .add(StreamingPlugin)
+            .add(WorldgenPlugin)
     }
 }

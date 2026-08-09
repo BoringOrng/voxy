@@ -22,6 +22,7 @@ vx_mod_behavior.workspace = true
 vx_mod_resource.workspace = true
 vx_streaming.workspace = true
 vx_world.workspace = true
+vx_worldgen.workspace = true
 
 [lints]
 workspace = true
