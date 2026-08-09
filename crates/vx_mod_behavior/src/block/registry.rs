@@ -5,7 +5,7 @@ use vx_world::block::BlockId;
 
 use crate::block::Block;
 
-#[derive(Resource, Default)]
+#[derive(Resource, Default, Clone)]
 pub struct BlockRegistry {
     by_id: HashMap<String, BlockId>,
     by_block_id: Vec<Block>,

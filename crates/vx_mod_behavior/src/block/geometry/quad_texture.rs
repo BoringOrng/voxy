@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub enum QuadTexture {
     Texture(String),
     ColorMapped { texture: String, color_map: String },

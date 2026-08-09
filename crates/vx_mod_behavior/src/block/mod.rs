@@ -6,7 +6,7 @@ mod registry;
 pub use geometry::BlockGeometry;
 pub use registry::BlockRegistry;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Block {
     id: String,
     geometry: BlockGeometry,
