@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use bevy::{
     math::bounding::Aabb3d, platform::collections::HashSet, prelude::*, tasks::AsyncComputeTaskPool,
 };
@@ -45,10 +47,11 @@ impl StreamingPlugin {
         channel: Res<DespawnChannel>,
         chunk_map: Res<ChunkMap>,
         stream_config: Res<super::Config>,
-        anchor_positions: Query<&ChunkPos, With<super::Anchor>>,
+        anchor_positions: Query<&ChunkPos, (With<super::Anchor>, Changed<ChunkPos>)>,
     ) {
         let unload_radius = stream_config.unload_radius();
         let pool = AsyncComputeTaskPool::get();
+        let chunk_map = Arc::new(chunk_map.clone());
 
         for &anchor_pos in &anchor_positions {
             let sender = channel.sender.clone();
@@ -83,33 +86,32 @@ impl StreamingPlugin {
         channel: Res<SpawnChannel>,
         chunk_map: Res<ChunkMap>,
         stream_config: Res<super::Config>,
-        anchor_positions: Query<&ChunkPos, With<super::Anchor>>,
+        anchor_positions: Query<&ChunkPos, (With<super::Anchor>, Changed<ChunkPos>)>,
     ) {
         let load_radius = UVec3::splat(stream_config.load_radius());
         let pool = AsyncComputeTaskPool::get();
-
-        let to_ignore: HashSet<_> = chunk_map.keys().copied().collect();
+        let to_ignore = Arc::new(chunk_map.keys().copied().collect::<HashSet<_>>());
 
         for &anchor_pos in &anchor_positions {
+            let spawn_bounds = Aabb3d::new(anchor_pos.as_vec3a(), load_radius.as_vec3a());
+            let min = spawn_bounds.min.as_ivec3();
+            let max = spawn_bounds.max.as_ivec3();
+
             let sender = channel.sender.clone();
             let to_ignore = to_ignore.clone();
 
             pool.spawn(async move {
-                let spawn_bounds = Aabb3d::new(anchor_pos.as_vec3a(), load_radius.as_vec3a());
-                let min = spawn_bounds.min.as_ivec3();
-                let max = spawn_bounds.max.as_ivec3();
+                for x in min.x..=max.x {
+                    for y in min.y..=max.y {
+                        for z in min.z..=max.z {
+                            let pos = ChunkPos::new(IVec3::new(x, y, z));
+                            if to_ignore.contains(&pos) {
+                                continue;
+                            }
 
-                for chunk_pos in (min.x..=max.x)
-                    // two flat maps here can be read as
-                    // `for x in .. { for y in .. { for z in .. { (x, y, z) } } }`
-                    .flat_map(move |x| (min.y..=max.y).map(move |y| (x, y)))
-                    .flat_map(move |(x, y)| (min.z..=max.z).map(move |z| (x, y, z)))
-                    .map(|(x, y, z)| ChunkPos::new(IVec3::new(x, y, z)))
-                    .filter(move |pos| !to_ignore.contains(pos))
-                {
-                    _ = sender.send(chunk_pos);
-                    // Transform::from_translation(chunk_pos.as_vec3() *
-                    // Chunk::SIZE.as_vec3()),
+                            _ = sender.send(pos);
+                        }
+                    }
                 }
             })
             .detach();
@@ -117,15 +119,17 @@ impl StreamingPlugin {
     }
 
     fn handle_spawn(channel: Res<SpawnChannel>, chunk_map: Res<ChunkMap>, mut commands: Commands) {
-        let unique_chunks: HashSet<_> = channel.receiver.try_iter().collect();
+        let chunk_size = Chunk::SIZE.as_vec3();
+        let mut seen = HashSet::new();
 
-        let to_spawn: Vec<_> = unique_chunks
-            .iter()
-            .filter(|&chunk_pos| !chunk_map.contains_key(chunk_pos))
-            .map(|&chunk_pos| {
+        let to_spawn: Vec<_> = channel
+            .receiver
+            .try_iter()
+            .filter(|chunk_pos| seen.insert(*chunk_pos) && !chunk_map.contains_key(chunk_pos))
+            .map(|chunk_pos| {
                 (
                     chunk_pos,
-                    Transform::from_translation(chunk_pos.as_vec3() * Chunk::SIZE.as_vec3()),
+                    Transform::from_translation(chunk_pos.as_vec3() * chunk_size),
                     chunk_state::NeedsWorldgen,
                 )
             })

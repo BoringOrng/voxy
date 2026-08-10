@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use bevy::{
     prelude::*,
     tasks::{AsyncComputeTaskPool, Task, futures},
@@ -20,9 +22,9 @@ impl WorldgenPlugin {
         chunks: Query<(Entity, &ChunkPos), With<chunk_state::NeedsWorldgen>>,
     ) {
         let pool = AsyncComputeTaskPool::get();
+        let block_registry = Arc::new(block_registry.clone());
 
         for (chunk_entity, &chunk_pos) in &chunks {
-            // horrendous but this should be cleaned up eventually anyway
             let block_registry = block_registry.clone();
 
             let task = pool.spawn(async move { Self::generate_chunk(chunk_pos, &block_registry) });
