@@ -26,7 +26,7 @@ impl WorldgenPlugin {
             let block_registry = block_registry.clone();
 
             let task = pool.spawn(async move { Self::generate_chunk(chunk_pos, &block_registry) });
-            commands.entity(chunk_entity).insert(ChunkTask(task));
+            commands.entity(chunk_entity).try_insert(ChunkTask(task));
         }
     }
 

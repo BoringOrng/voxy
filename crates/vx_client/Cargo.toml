@@ -11,6 +11,7 @@ bevy = { workspace = true, features = [
   "zstd_rust",
   "bevy_gizmos",
   "bevy_gizmos_render",
+  "debug",
 ] }
 
 vx_climate.workspace = true
