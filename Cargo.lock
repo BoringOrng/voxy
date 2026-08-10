@@ -4863,6 +4863,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "vx_datastructure"
+version = "0.1.0"
+
+[[package]]
 name = "vx_entity"
 version = "0.1.0"
 dependencies = [
@@ -4944,6 +4948,7 @@ name = "vx_world"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "vx_datastructure",
 ]
 
 [[package]]

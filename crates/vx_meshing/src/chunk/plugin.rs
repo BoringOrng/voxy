@@ -69,10 +69,7 @@ impl ChunkMeshingPlugin {
             );
 
             let quads = chunk_data
-                .blocks()
                 .iter()
-                .enumerate()
-                .filter_map(|(i, id)| id.map(|id| (BlockPos::from_raw(i as u16), id)))
                 .flat_map(|(block_pos, block_id)| {
                     let block = block_registry.get_block(block_id);
 
