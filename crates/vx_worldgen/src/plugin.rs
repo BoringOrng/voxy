@@ -1,4 +1,7 @@
-use std::sync::Arc;
+use std::{
+    sync::Arc,
+    time::{Duration, Instant},
+};
 
 use bevy::{
     prelude::*,
@@ -16,22 +19,30 @@ struct ChunkTask(Task<ChunkData>);
 pub struct WorldgenPlugin;
 
 impl WorldgenPlugin {
-    const GENERATE_RATE_LIMIT: usize = 32;
-    const HANDLE_RATE_LIMIT: usize = 32;
+    const MAX_ACTIVE_TASKS: usize = 64;
+    const HANDLE_TIME_BUDGET: Duration = Duration::from_millis(2);
 
     fn generate_chunks(
         mut commands: Commands,
         block_registry: If<Res<BlockRegistry>>,
         climate_sampler: If<Res<vx_climate::Sampler>>,
+        active_tasks: Query<(), With<ChunkTask>>,
         chunks: Query<(Entity, &ChunkPos), With<chunk_state::NeedsWorldgen>>,
     ) {
+        let current_active = active_tasks.count();
+        if current_active >= Self::MAX_ACTIVE_TASKS {
+            return;
+        }
+
+        let spawn_budget = Self::MAX_ACTIVE_TASKS - current_active;
+
         let pool = AsyncComputeTaskPool::get();
         let block_registry = Arc::new(block_registry.clone());
         let climate_sampler = Arc::new(climate_sampler.clone());
 
         let tasks: Vec<_> = chunks
             .iter()
-            .take(Self::GENERATE_RATE_LIMIT)
+            .take(spawn_budget)
             .map(|(chunk_entity, &chunk_pos)| {
                 let block_registry = block_registry.clone();
                 let climate_sampler = climate_sampler.clone();
@@ -50,12 +61,14 @@ impl WorldgenPlugin {
     }
 
     fn handle_finished_chunks(mut commands: Commands, mut tasks: Query<(Entity, &mut ChunkTask)>) {
+        let now = Instant::now();
+
         for (chunk_entity, chunk_data) in tasks
             .iter_mut()
             .filter_map(|(task_entity, mut gen_task)| {
                 futures::check_ready(&mut gen_task.0).map(|gen_data| (task_entity, gen_data))
             })
-            .take(Self::HANDLE_RATE_LIMIT)
+            .take_while(|_| now.elapsed() < Self::HANDLE_TIME_BUDGET)
         {
             commands
                 .entity(chunk_entity)
