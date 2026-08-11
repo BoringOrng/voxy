@@ -7,7 +7,7 @@ use bevy::{
 use vx_mod_behavior::block::BlockRegistry;
 use vx_world::{
     block::BlockPos,
-    chunk::{ChunkData, ChunkPos, chunk_state},
+    chunk::{Chunk, ChunkData, ChunkPos, chunk_state},
 };
 
 #[derive(Component)]
@@ -19,15 +19,20 @@ impl WorldgenPlugin {
     fn generate_chunks(
         mut commands: Commands,
         block_registry: Res<BlockRegistry>,
+        climate_sampler: If<Res<vx_climate::Sampler>>,
         chunks: Query<(Entity, &ChunkPos), With<chunk_state::NeedsWorldgen>>,
     ) {
         let pool = AsyncComputeTaskPool::get();
         let block_registry = Arc::new(block_registry.clone());
+        let climate_sampler = Arc::new(climate_sampler.clone());
 
         for (chunk_entity, &chunk_pos) in &chunks {
             let block_registry = block_registry.clone();
+            let climate_sampler = climate_sampler.clone();
 
-            let task = pool.spawn(async move { Self::generate_chunk(chunk_pos, &block_registry) });
+            let task = pool.spawn(async move {
+                Self::generate_chunk(chunk_pos, &block_registry, &climate_sampler)
+            });
             commands.entity(chunk_entity).try_insert(ChunkTask(task));
         }
     }
@@ -47,33 +52,50 @@ impl WorldgenPlugin {
         }
     }
 
-    fn generate_chunk(pos: ChunkPos, block_registry: &BlockRegistry) -> ChunkData {
+    fn generate_chunk(
+        chunk_pos: ChunkPos,
+        block_registry: &BlockRegistry,
+        climate_sampler: &vx_climate::Sampler,
+    ) -> ChunkData {
         let mut chunk_data = ChunkData::default();
 
-        match pos.y {
-            y if y > 0 => {}
-            y if y < 0 => {}
-            _ => {
-                let dirt_id = block_registry
-                    .get_id("voxy:dirt")
-                    .expect("dirt should exist");
+        let dirt_id = block_registry
+            .get_id("voxy:dirt")
+            .expect("dirt should exist");
 
-                let grass_id = block_registry
-                    .get_id("voxy:grass")
-                    .expect("grass should exist");
+        let grass_id = block_registry
+            .get_id("voxy:grass")
+            .expect("grass should exist");
 
-                for x in 0..32 {
-                    for y in 0..2 {
-                        for z in 0..32 {
-                            chunk_data.insert(BlockPos::new(x, y, z), dirt_id);
-                        }
-                    }
+        let world_base = chunk_pos.as_vec3() * Chunk::SIZE.as_vec3();
+
+        for x in 0..Chunk::SIZE.x {
+            for z in 0..Chunk::SIZE.z {
+                let world_x = world_base.x + x as f32;
+                let world_z = world_base.z + z as f32;
+
+                // in range -1..=1
+                let continental = climate_sampler.continental(Vec2::new(world_x, world_z));
+                let surface_height = continental as i32;
+
+                if world_base.y as i32 > surface_height {
+                    continue;
                 }
 
-                for x in 0..32 {
-                    for z in 0..32 {
-                        chunk_data.insert(BlockPos::new(x, 2, z), grass_id);
+                for y in 0..Chunk::SIZE.y {
+                    let world_y = (world_base.y + y as f32) as i32;
+
+                    if world_y > surface_height {
+                        break;
                     }
+
+                    let block = if world_y == surface_height {
+                        grass_id
+                    } else {
+                        dirt_id
+                    };
+
+                    chunk_data.insert(BlockPos::new(x as u8, y as u8, z as u8), block);
                 }
             }
         }

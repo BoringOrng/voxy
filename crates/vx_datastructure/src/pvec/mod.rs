@@ -8,6 +8,7 @@ use crate::palette::{self, Palette};
 pub struct PVec<T: Copy + Eq> {
     runs: Vec<Run>,
     palette: Palette<T>,
+    occupied: u32,
 }
 
 impl<T: Copy + Eq> PVec<T> {
@@ -31,8 +32,13 @@ impl<T: Copy + Eq> PVec<T> {
     }
 
     #[must_use]
-    pub fn is_empty(&self) -> bool {
-        self.runs.len() == 1 && self.runs[0].palette().is_empty()
+    pub const fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    #[must_use]
+    pub const fn len(&self) -> usize {
+        self.occupied as usize
     }
 
     pub fn iter(&self) -> impl Iterator<Item = (u16, T)> {
@@ -54,6 +60,12 @@ impl<T: Copy + Eq> PVec<T> {
 
         if old == item {
             return old;
+        }
+
+        match (old.is_some(), item.is_some()) {
+            (false, true) => self.occupied += 1,
+            (true, false) => self.occupied -= 1,
+            _ => {}
         }
 
         let target = item.map_or(palette::Index::EMPTY, |item| self.palette.intern(item));
@@ -120,6 +132,7 @@ impl<T: Copy + Eq> Default for PVec<T> {
         Self {
             runs: vec![Run::default()],
             palette: Palette::default(),
+            occupied: 0,
         }
     }
 }

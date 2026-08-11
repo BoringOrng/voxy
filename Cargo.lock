@@ -4956,6 +4956,7 @@ name = "vx_worldgen"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "vx_climate",
  "vx_mod_behavior",
  "vx_world",
 ]

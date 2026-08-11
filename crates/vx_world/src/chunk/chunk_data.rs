@@ -25,7 +25,12 @@ impl ChunkData {
     }
 
     #[must_use]
-    pub fn is_empty(&self) -> bool {
+    pub const fn is_empty(&self) -> bool {
         self.blocks.is_empty()
+    }
+
+    #[must_use]
+    pub const fn is_full(&self) -> bool {
+        self.blocks.len() == super::Chunk::VOLUME
     }
 }

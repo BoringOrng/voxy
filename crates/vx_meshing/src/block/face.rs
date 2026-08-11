@@ -71,8 +71,8 @@ impl Face {
         let wrapped = match self {
             Self::Up => pos.with_y(0),
             Self::Down => pos.with_y(Chunk::SIZE.y as u8 - 1),
-            Self::North => pos.with_z(0),
-            Self::South => pos.with_z(Chunk::SIZE.z as u8 - 1),
+            Self::North => pos.with_z(Chunk::SIZE.z as u8 - 1),
+            Self::South => pos.with_z(0),
             Self::East => pos.with_x(0),
             Self::West => pos.with_x(Chunk::SIZE.x as u8 - 1),
         };

@@ -21,8 +21,8 @@ impl Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            load_radius: 8,
-            unload_radius: 10,
+            load_radius: 16,
+            unload_radius: 18,
         }
     }
 }

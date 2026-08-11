@@ -1,9 +1,6 @@
 use bevy::prelude::*;
 use vx_mod_behavior::block::{Block, BlockGeometry, BlockRegistry, geometry::SidesTexture};
-use vx_world::{
-    block::BlockPos,
-    chunk::{ChunkData, ChunkMap, ChunkPos, chunk_state},
-};
+use vx_world::chunk::{ChunkData, ChunkMap, ChunkPos, chunk_state};
 
 use crate::{
     Quad,
@@ -20,13 +17,9 @@ struct PendingMesh(Vec<Quad>);
 impl ChunkMeshingPlugin {
     #[expect(
         clippy::needless_pass_by_value,
-        clippy::cast_possible_truncation,
         reason = "
-            -  `Res<ChunkMap>` and `Res<BlockRegistry>` must be passed by value as
-                is required by bevy
-
-            -  `i as u16` is valid because `32^3` is the max number of blocks in
-                a chunk
+            `Res<ChunkMap>` and `Res<BlockRegistry>` must be passed by value as
+             is required by bevy
         "
     )]
     fn generate_quads(
@@ -63,12 +56,23 @@ impl ChunkMeshingPlugin {
                 continue;
             }
 
-            let sampler = &BlockSampler::new(
-                chunk_data,
-                adjacent_chunks.map(|e| e.and_then(|e| chunk_data_q.get(e).ok())),
-            );
+            let adjacent_chunk_data =
+                adjacent_chunks.map(|e| e.and_then(|e| chunk_data_q.get(e).ok()));
 
-            let quads = chunk_data
+            if adjacent_chunk_data
+                .iter()
+                .all(|d| d.is_some_and(ChunkData::is_full))
+            {
+                commands
+                    .entity(chunk_entity)
+                    .remove::<chunk_state::NeedsMeshing>();
+
+                continue;
+            }
+
+            let sampler = &BlockSampler::new(chunk_data, adjacent_chunk_data);
+
+            let quads: Vec<_> = chunk_data
                 .iter()
                 .flat_map(|(block_pos, block_id)| {
                     let block = block_registry.get_block(block_id);
@@ -86,6 +90,15 @@ impl ChunkMeshingPlugin {
                         })
                 })
                 .collect();
+
+            // the mesher really does have to undergo some optimizations
+            if quads.is_empty() {
+                commands
+                    .entity(chunk_entity)
+                    .remove::<chunk_state::NeedsMeshing>();
+
+                continue;
+            }
 
             commands
                 .entity(chunk_entity)
