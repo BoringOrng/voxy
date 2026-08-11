@@ -16,9 +16,12 @@ struct ChunkTask(Task<ChunkData>);
 pub struct WorldgenPlugin;
 
 impl WorldgenPlugin {
+    const GENERATE_RATE_LIMIT: usize = 32;
+    const HANDLE_RATE_LIMIT: usize = 32;
+
     fn generate_chunks(
         mut commands: Commands,
-        block_registry: Res<BlockRegistry>,
+        block_registry: If<Res<BlockRegistry>>,
         climate_sampler: If<Res<vx_climate::Sampler>>,
         chunks: Query<(Entity, &ChunkPos), With<chunk_state::NeedsWorldgen>>,
     ) {
@@ -26,29 +29,38 @@ impl WorldgenPlugin {
         let block_registry = Arc::new(block_registry.clone());
         let climate_sampler = Arc::new(climate_sampler.clone());
 
-        for (chunk_entity, &chunk_pos) in &chunks {
-            let block_registry = block_registry.clone();
-            let climate_sampler = climate_sampler.clone();
+        let tasks: Vec<_> = chunks
+            .iter()
+            .take(Self::GENERATE_RATE_LIMIT)
+            .map(|(chunk_entity, &chunk_pos)| {
+                let block_registry = block_registry.clone();
+                let climate_sampler = climate_sampler.clone();
 
-            let task = pool.spawn(async move {
-                Self::generate_chunk(chunk_pos, &block_registry, &climate_sampler)
-            });
-            commands.entity(chunk_entity).try_insert(ChunkTask(task));
+                let task = pool.spawn(async move {
+                    Self::generate_chunk(chunk_pos, &block_registry, &climate_sampler)
+                });
+
+                (chunk_entity, ChunkTask(task))
+            })
+            .collect();
+
+        if !tasks.is_empty() {
+            commands.insert_batch(tasks);
         }
     }
 
     fn handle_finished_chunks(mut commands: Commands, mut tasks: Query<(Entity, &mut ChunkTask)>) {
-        for (chunk_entity, chunk_data) in
-            tasks.iter_mut().filter_map(|(task_entity, mut gen_task)| {
+        for (chunk_entity, chunk_data) in tasks
+            .iter_mut()
+            .filter_map(|(task_entity, mut gen_task)| {
                 futures::check_ready(&mut gen_task.0).map(|gen_data| (task_entity, gen_data))
             })
+            .take(Self::HANDLE_RATE_LIMIT)
         {
             commands
                 .entity(chunk_entity)
-                .remove::<ChunkTask>()
-                .insert(chunk_state::NeedsMeshing)
-                .remove::<chunk_state::NeedsWorldgen>()
-                .insert(chunk_data);
+                .remove::<(ChunkTask, chunk_state::NeedsWorldgen)>()
+                .insert((chunk_state::NeedsMeshing, chunk_data));
         }
     }
 
@@ -107,7 +119,7 @@ impl WorldgenPlugin {
 impl Plugin for WorldgenPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
-            FixedUpdate,
+            Update,
             (Self::generate_chunks, Self::handle_finished_chunks),
         );
     }
