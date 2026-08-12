@@ -42,11 +42,7 @@ pub struct Sampler {
 
 impl Sampler {
     pub fn reseed(&mut self, seed: super::WorldSeed) {
-        // ignore this for now I'm too lazy to change the seed to an u32.
-        let seed = seed.wrapping_add(u64::from_le_bytes(*b"voxyorng"));
-        let seed = ((seed >> 32) as u32).wrapping_add((seed & 0xFFFF_FFFF) as u32);
-
-        self.wind.set_seed(seed);
+        self.wind.set_seed(*seed);
         self.temperature.set_seed(seed.wrapping_add(1000));
         self.humidity.set_seed(seed.wrapping_add(2000));
         self.continental.set_seed(seed.wrapping_add(3000));

@@ -13,7 +13,7 @@ pub struct Args {
 
     /// What world seed to build the world with
     #[arg(long, short)]
-    seed: Option<u64>,
+    seed: Option<u32>,
 }
 
 impl Args {
@@ -25,7 +25,7 @@ impl Args {
         &self.username
     }
 
-    pub const fn seed(&self) -> Option<u64> {
+    pub const fn seed(&self) -> Option<u32> {
         self.seed
     }
 }

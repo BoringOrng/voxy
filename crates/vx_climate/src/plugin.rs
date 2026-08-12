@@ -21,13 +21,9 @@ impl ClimatePlugin {
         let lo = (hashed_t & 0xFFFF_FFFF) as u32;
         let hi = (hashed_t >> 32) as u32;
 
-        let mut rng = NoiseRng(lo ^ hi);
+        let rng = NoiseRng(lo ^ hi);
 
-        let lo = u64::from(rng.rand_u32(u32::from_ne_bytes(*b"voxy")));
-        rng.re_seed();
-        let hi = u64::from(rng.rand_u32(u32::from_be_bytes(*b"voxy")));
-
-        commands.insert_resource(super::WorldSeed((hi << 32) | lo));
+        commands.insert_resource(super::WorldSeed(rng.rand_u32(u32::from_ne_bytes(*b"voxy"))));
     }
 
     #[expect(

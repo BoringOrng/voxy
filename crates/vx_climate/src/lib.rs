@@ -8,4 +8,4 @@ pub use sampler::Sampler;
 
 #[derive(Resource, Deref, Clone, Copy)]
 #[component(immutable)]
-pub struct WorldSeed(pub u64);
+pub struct WorldSeed(pub u32);
