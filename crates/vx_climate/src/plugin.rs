@@ -30,6 +30,10 @@ impl ClimatePlugin {
         commands.insert_resource(super::WorldSeed((hi << 32) | lo));
     }
 
+    #[expect(
+        clippy::needless_pass_by_value,
+        reason = "`Res<super::WorldSeed>` must be passed by value as is required by bevy"
+    )]
     fn setup_sampler(mut commands: Commands, seed: Res<super::WorldSeed>) {
         let mut sampler = super::Sampler::default();
         sampler.reseed(*seed);
