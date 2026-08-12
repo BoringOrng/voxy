@@ -22,6 +22,13 @@ impl WorldgenPlugin {
     const MAX_ACTIVE_TASKS: usize = 128;
     const HANDLE_TIME_BUDGET: Duration = Duration::from_millis(2);
 
+    #[expect(
+        clippy::needless_pass_by_value,
+        reason = "
+            `Res<BlockRegistry>` and `Res<vx_climate::Sampler>` must be passed by
+            value as is required by bevy
+        "
+    )]
     fn generate_chunks(
         mut commands: Commands,
         block_registry: If<Res<BlockRegistry>>,
@@ -77,6 +84,16 @@ impl WorldgenPlugin {
         }
     }
 
+    #[expect(
+        clippy::cast_precision_loss,
+        clippy::cast_possible_truncation,
+        clippy::float_cmp,
+        reason = "
+            `Chunk::SIZE` shouldn't have any axis that exceeds 23-bit precision,
+            nor 8-bit precision. Comparison of floats is valid as both have been
+            truncated.
+        "
+    )]
     fn generate_chunk(
         chunk_pos: ChunkPos,
         block_registry: &BlockRegistry,
@@ -101,14 +118,14 @@ impl WorldgenPlugin {
 
                 // in range -1..=1
                 let continental = climate_sampler.continental(Vec2::new(world_x, world_z));
-                let surface_height = continental as i32;
+                let surface_height = continental.trunc();
 
-                if world_base.y as i32 > surface_height {
+                if world_base.y > surface_height {
                     continue;
                 }
 
                 for y in 0..Chunk::SIZE.y {
-                    let world_y = (world_base.y + y as f32) as i32;
+                    let world_y = (world_base.y + y as f32).trunc();
 
                     if world_y > surface_height {
                         break;
