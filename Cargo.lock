@@ -4939,7 +4939,7 @@ name = "vx_streaming"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "crossbeam-channel",
+ "ordered-float",
  "vx_world",
 ]
 
