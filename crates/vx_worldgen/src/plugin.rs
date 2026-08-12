@@ -19,7 +19,7 @@ struct ChunkTask(Task<ChunkData>);
 pub struct WorldgenPlugin;
 
 impl WorldgenPlugin {
-    const MAX_ACTIVE_TASKS: usize = 64;
+    const MAX_ACTIVE_TASKS: usize = 128;
     const HANDLE_TIME_BUDGET: Duration = Duration::from_millis(2);
 
     fn generate_chunks(
