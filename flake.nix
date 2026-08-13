@@ -31,20 +31,23 @@
         {
           inherit packages formatter;
 
-          devShells.default = pkgs.mkShell.override {
-            stdenv = pkgs.useWildLinker pkgs.clangStdenv;
-          } {
-            name = "voxy";
+          devShells.default =
+            pkgs.mkShell.override
+              {
+                stdenv = if (pkgs.stdenv.isLinux) then (pkgs.useWildLinker pkgs.clangStdenv) else pkgs.stdenv;
+              }
+              {
+                name = "voxy";
 
-            nativeBuildInputs = with pkgs; [
-              packages.rust-toolchain.develop
+                nativeBuildInputs = with pkgs; [
+                  packages.rust-toolchain.develop
 
-              cargo-flamegraph
-              cargo-sort
-              wgsl-analyzer
-              tracy
-            ];
-          };
+                  cargo-flamegraph
+                  cargo-sort
+                  wgsl-analyzer
+                  tracy
+                ];
+              };
         };
 
       config =
