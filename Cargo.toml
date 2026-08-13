@@ -68,3 +68,8 @@ lto = "thin"
 [profile.debugging]
 inherits = "dev"
 debug = true
+
+[profile.debugging.package."*"]
+debug = true
+codegen-backend = "llvm"
+opt-level = 3
