@@ -1,0 +1,14 @@
+[package]
+name = "vx_worldgen"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy.workspace = true
+
+vx_climate.workspace = true
+vx_world.workspace = true
+vx_mod_behavior.workspace = true
+
+[lints]
+workspace = true

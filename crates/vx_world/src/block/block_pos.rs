@@ -24,13 +24,13 @@ impl BlockPos {
 
     #[must_use]
     pub const fn north(self) -> Option<Self> {
-        self.with_z(self.z() + 1)
+        // fun little hack, this overflows to u8::MAX which cant fit so it fails
+        self.with_z(self.z().wrapping_sub(1))
     }
 
     #[must_use]
     pub const fn south(self) -> Option<Self> {
-        // fun little hack, this overflows to u8::MAX which cant fit so it fails
-        self.with_z(self.z().wrapping_sub(1))
+        self.with_z(self.z() + 1)
     }
 
     #[must_use]

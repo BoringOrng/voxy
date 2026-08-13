@@ -1,14 +1,11 @@
 use bevy::prelude::*;
 use vx_mod_behavior::block::{Block, BlockGeometry, BlockRegistry, geometry::SidesTexture};
-use vx_world::{
-    block::BlockPos,
-    chunk::{ChunkData, ChunkMap, ChunkPos},
-};
+use vx_world::chunk::{ChunkData, ChunkMap, ChunkPos, chunk_state};
 
 use crate::{
     Quad,
     block::{self, BlockSampler, Face, SharedBlockMaterial},
-    chunk::{DirtyChunk, mesh::ChunkMesh},
+    chunk::mesh::ChunkMesh,
 };
 
 #[derive(Clone, Copy, Default)]
@@ -20,13 +17,9 @@ struct PendingMesh(Vec<Quad>);
 impl ChunkMeshingPlugin {
     #[expect(
         clippy::needless_pass_by_value,
-        clippy::cast_possible_truncation,
         reason = "
-            -  `Res<ChunkMap>` and `Res<BlockRegistry>` must be passed by value as
-                is required by bevy
-
-            -  `i as u16` is valid because `32^3` is the max number of blocks in
-                a chunk
+            `Res<ChunkMap>` and `Res<BlockRegistry>` must be passed by value as
+             is required by bevy
         "
     )]
     fn generate_quads(
@@ -35,7 +28,8 @@ impl ChunkMeshingPlugin {
         block_texture_array: If<Res<block::TextureArray>>,
         chunk_map: Res<ChunkMap>,
         chunk_data_q: Query<&ChunkData>,
-        dirty_chunks: Query<(Entity, &ChunkPos), With<DirtyChunk>>,
+        needs_worldgen: Query<(), With<chunk_state::NeedsWorldgen>>,
+        dirty_chunks: Query<(Entity, &ChunkPos), With<chunk_state::NeedsMeshing>>,
     ) {
         let block_texture_array = &block_texture_array.into_inner();
 
@@ -44,18 +38,42 @@ impl ChunkMeshingPlugin {
                 .get(chunk_entity)
                 .expect("All chunk entities should have an associated `ChunkData`");
 
-            let sampler = &BlockSampler::new(
-                chunk_data,
-                chunk_map
-                    .adjacent_to(chunk_pos)
-                    .map(|e| e.and_then(|e| chunk_data_q.get(e).ok())),
-            );
+            // otherwise we get use-after-frees
+            if chunk_data.is_empty() {
+                commands
+                    .entity(chunk_entity)
+                    .remove::<chunk_state::NeedsMeshing>();
 
-            let quads = chunk_data
-                .blocks()
+                continue;
+            }
+
+            let adjacent_chunks = chunk_map.adjacent_to(chunk_pos);
+
+            if !adjacent_chunks
                 .iter()
-                .enumerate()
-                .filter_map(|(i, id)| id.map(|id| (BlockPos::from_raw(i as u16), id)))
+                .all(|e| e.is_some_and(|e| !needs_worldgen.contains(e)))
+            {
+                continue;
+            }
+
+            let adjacent_chunk_data =
+                adjacent_chunks.map(|e| e.and_then(|e| chunk_data_q.get(e).ok()));
+
+            if adjacent_chunk_data
+                .iter()
+                .all(|d| d.is_some_and(ChunkData::is_full))
+            {
+                commands
+                    .entity(chunk_entity)
+                    .remove::<chunk_state::NeedsMeshing>();
+
+                continue;
+            }
+
+            let sampler = &BlockSampler::new(chunk_data, adjacent_chunk_data);
+
+            let quads: Vec<_> = chunk_data
+                .iter()
                 .flat_map(|(block_pos, block_id)| {
                     let block = block_registry.get_block(block_id);
 
@@ -73,10 +91,19 @@ impl ChunkMeshingPlugin {
                 })
                 .collect();
 
+            // the mesher really does have to undergo some optimizations
+            if quads.is_empty() {
+                commands
+                    .entity(chunk_entity)
+                    .remove::<chunk_state::NeedsMeshing>();
+
+                continue;
+            }
+
             commands
                 .entity(chunk_entity)
                 .insert(PendingMesh(quads))
-                .remove::<DirtyChunk>();
+                .remove::<chunk_state::NeedsMeshing>();
         }
     }
 

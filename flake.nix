@@ -42,6 +42,7 @@
               cargo-flamegraph
               cargo-sort
               wgsl-analyzer
+              tracy
             ];
           };
         };

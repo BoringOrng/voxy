@@ -6,7 +6,7 @@ use vx_entity::VxEntity;
 
 #[derive(Clone, Copy, Debug, Default, Component)]
 #[component(on_add, on_remove)]
-#[require(VxEntity, Name, Transform)]
+#[require(VxEntity, Name, vx_streaming::Anchor)]
 pub struct Player;
 
 impl Player {

@@ -9,14 +9,21 @@ bevy = { workspace = true, features = [
   "default_platform",
   "tonemapping_luts",
   "zstd_rust",
+  "bevy_gizmos",
+  "bevy_gizmos_render",
+  "debug",
 ] }
 
+vx_climate.workspace = true
+vx_entity.workspace = true
 vx_player.workspace = true
 vx_meshing.workspace = true
 vx_mod.workspace = true
 vx_mod_behavior.workspace = true
 vx_mod_resource.workspace = true
+vx_streaming.workspace = true
 vx_world.workspace = true
+vx_worldgen.workspace = true
 
 [lints]
 workspace = true
