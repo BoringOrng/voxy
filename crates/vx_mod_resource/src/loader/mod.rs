@@ -10,7 +10,7 @@ pub trait Loader: Sized + Send + Sync + 'static {
     type Asset: Send + Sync + 'static;
     type Error: std::error::Error;
 
-    // not the dir from the assets root, it's the dir from the `mod/resources` root.
+    // not the dir from the mods root, it's the dir from the `mod/resources` root.
     const DIR: &'static str;
 
     fn extensions() -> &'static [&'static str];
@@ -18,7 +18,7 @@ pub trait Loader: Sized + Send + Sync + 'static {
     /// # Errors
     ///
     /// Returns the associated [`Loader::Error`] when loading the asset fails.
-    fn try_load(path: &Path, asset_server: &AssetServer) -> Result<Self::Asset, Self::Error>;
+    fn try_load(path: &str, asset_server: &AssetServer) -> Result<Self::Asset, Self::Error>;
 
     // anyone looking to implement this should take note that this is *only* true
     // for synchronous asset loading. Things that are asynchronous should override

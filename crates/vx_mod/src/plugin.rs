@@ -7,8 +7,12 @@ use crate::{LoadedMods, ModInfo};
 pub struct CoreModPlugin;
 
 impl CoreModPlugin {
+    /// # Panics
+    ///
+    /// Panics if there is an attempt to load a mod outside of the mods
+    /// directory.
     pub fn load_mods(mut commands: Commands) {
-        let mods_dir = match fs::read_dir("assets/mods/") {
+        let mods_dir = match fs::read_dir(ModInfo::MODS_DIR) {
             Ok(mods_dir) => mods_dir,
             Err(err) => {
                 warn!("Failed to load mods directory: ({err})");
@@ -19,7 +23,7 @@ impl CoreModPlugin {
         let mods = mods_dir
             .filter_map(Result::ok)
             .map(|entry| entry.path())
-            .filter_map(|root| match ModInfo::load(root.clone()) {
+            .filter_map(|root| match ModInfo::load(&root) {
                 Ok(info) => {
                     info!("Successfully parsed mod `{}`!", info.id());
                     Some(info)

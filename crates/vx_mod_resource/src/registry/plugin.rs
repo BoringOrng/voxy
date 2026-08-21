@@ -26,18 +26,26 @@ impl<L: crate::Loader> LoaderPlugin<L> {
         let registry: HashMap<_, _> = loaded_mods
             .iter()
             .filter_map(|m| {
-                let dir = m.root().join("resource").join(L::DIR);
-                Some((fs::read_dir(dir).ok()?, m.id()))
+                let dir = m.real_asset_path().join(L::DIR);
+                Some((fs::read_dir(dir).ok()?, m))
             })
-            .flat_map(|(entries, mod_id)| {
+            .flat_map(|(entries, mod_info)| {
                 entries
                     .filter_map(Result::ok)
                     .map(|entry| entry.path())
                     .filter(|path| L::matches_extension(path))
                     .filter_map(|path| {
-                        Self::try_load_entry(asset_server, mod_id, &path)
-                            .inspect_err(|err| warn!("Couldn't load `{}`: {err}", path.display()))
-                            .ok()
+                        Self::try_load_entry(
+                            asset_server,
+                            mod_info.id(),
+                            &mod_info
+                                .asset_path()
+                                .join(path.strip_prefix(mod_info.real_asset_path()).expect(
+                                "path should always have a prefix component in the real asset path",
+                            )),
+                        )
+                        .inspect_err(|err| warn!("Couldn't load `{}`: {err}", path.display()))
+                        .ok()
                     })
             })
             .collect();
@@ -51,12 +59,18 @@ impl<L: crate::Loader> LoaderPlugin<L> {
     fn try_load_entry(
         asset_server: &AssetServer,
         mod_id: &str,
-        path: &Path,
+        asset_path: &Path,
     ) -> Result<(String, L::Asset), L::Error> {
-        let stem = path.file_stem().unwrap_or_default().to_string_lossy();
-        let asset = L::try_load(path, asset_server)?;
+        let asset = L::try_load(&asset_path.to_string_lossy(), asset_server)?;
 
-        Ok((format!("{mod_id}::{}::{stem}", L::DIR), asset))
+        Ok((
+            format!(
+                "{mod_id}::{}::{}",
+                L::DIR,
+                asset_path.file_stem().unwrap().to_string_lossy(),
+            ),
+            asset,
+        ))
     }
 
     #[expect(
