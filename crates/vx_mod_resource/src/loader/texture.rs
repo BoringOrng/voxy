@@ -1,13 +1,12 @@
-mod error;
+use std::convert::Infallible;
 
 use bevy::prelude::*;
-use error::Error;
 
 pub struct TextureLoader;
 
 impl super::Loader for TextureLoader {
     type Asset = Handle<Image>;
-    type Error = Error;
+    type Error = Infallible;
 
     const DIR: &'static str = "texture";
 
