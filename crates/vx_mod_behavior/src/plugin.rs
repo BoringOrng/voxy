@@ -18,7 +18,7 @@ impl ModBehaviorPlugin {
     pub fn setup_block_registry(loaded_mods: Res<LoadedMods>, mut commands: Commands) {
         let raw_block_registry = loaded_mods
             .iter()
-            .filter_map(|loaded_mod| fs::read_dir(loaded_mod.root().join("behavior/block/")).ok())
+            .filter_map(|loaded_mod| fs::read_dir(loaded_mod.behavior_path().join("block/")).ok())
             .flat_map(|entries| {
                 entries.filter_map(|entry| {
                     Self::try_load_block(&entry.ok()?.path())

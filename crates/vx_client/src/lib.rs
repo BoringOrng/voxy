@@ -19,9 +19,11 @@ pub struct VxClientPlugins;
 impl PluginGroup for VxClientPlugins {
     fn build(self) -> bevy::app::PluginGroupBuilder {
         PluginGroupBuilder::start::<Self>()
+            // must be initialized before `DefaultPlugins` otherwise you get a
+            // stupid obscure error to do with the asset loader
+            .add_group(vx_mod_resource::Plugins)
             .add_group(DefaultPlugins)
             .add_group(WorldPlugins)
-            .add_group(vx_mod_resource::Plugins)
             // .add_group(debug::Plugins)
             .add_group(MeshingPlugins)
             .add(LocalPlayerPlugin::default())
