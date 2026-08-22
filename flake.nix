@@ -82,7 +82,6 @@
               inherit targets;
               extensions = [
                 "rust-src"
-                "rustc-codegen-cranelift-preview"
                 "rust-analyzer"
               ];
             };
