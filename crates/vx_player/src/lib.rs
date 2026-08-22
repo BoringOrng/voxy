@@ -1,3 +1,5 @@
+#![feature(coverage_attribute)]
+
 use bevy::{
     ecs::{lifecycle::HookContext, world::DeferredWorld},
     prelude::*,
@@ -10,6 +12,7 @@ use vx_entity::VxEntity;
 pub struct Player;
 
 impl Player {
+    #[coverage(off)]
     #[expect(
         clippy::needless_pass_by_value,
         reason = "`DeferredWorld` must be passed by value as is required by bevy"
@@ -22,6 +25,7 @@ impl Player {
         info!("Player spawned: `{player_name}`");
     }
 
+    #[coverage(off)]
     #[expect(
         clippy::needless_pass_by_value,
         reason = "`DeferredWorld` must be passed by value as is required by bevy"
