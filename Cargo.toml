@@ -1,5 +1,3 @@
-cargo-features = ["codegen-backend"]
-
 [package]
 name = "voxy"
 version = "0.1.0"
@@ -50,12 +48,10 @@ vx_climate.workspace = true
 vx_server.workspace  = true
 
 [profile.dev]
-codegen-backend = "cranelift"
 debug = "line-tables-only"
 
 [profile.dev.package."*"]
 debug = false
-codegen-backend = "llvm"
 opt-level = 3
 
 [profile.dev.package.wgpu-types]
