@@ -3,6 +3,7 @@ name = "tarpaulin"
 
 force-clean = false
 skip-clean = true
+no-run = true
 
 workspace = true
 
