@@ -41,10 +41,13 @@
 
                 nativeBuildInputs = with pkgs; [
                   packages.rust-toolchain.develop
+                  wgsl-analyzer
 
                   cargo-flamegraph
                   cargo-sort
-                  wgsl-analyzer
+                  cargo-tarpaulin
+                  cargo-nextest
+
                   tracy
                 ];
               };
